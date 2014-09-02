@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <name>tue_ethercat_drivers</name>
+  <version>0.0.0</version>
+  <description>The tue_ethercat_drivers package</description>
+  <maintainer email="J.J.M.Lunenburg@tue.nl">Janno Lunenburg</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>ocl</build_depend>
+  <build_depend>soem_master</build_depend>
+  <run_depend>ocl</run_depend>
+  <run_depend>soem_master</run_depend>
+  <export>
+  </export>
+</package>

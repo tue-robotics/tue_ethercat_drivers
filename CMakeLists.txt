@@ -3,14 +3,12 @@ project(tue_ethercat_drivers)
 
 find_package(catkin REQUIRED 
 	soem_master
-	soem_beckhoff_drivers
  )
 
 find_package(OROCOS-RTT REQUIRED ${RTT_HINTS} )
 include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
 
 include_directories(
-
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -19,12 +17,9 @@ include_directories(${soem_INCLUDE_DIRS})
 
 orocos_use_package(soem_master)
 
-#ros_generate_rtt_typekit(soem_beckhoff_drivers)
+#ros_generate_rtt_typekit(tue_ethercat_drivers)
 
-#orocos_plugin(TUeES030 ${soem_beckhoff_drivers_PACKAGE_PATH}/src/soem_beckhoff_drivers.cpp TUeEthercatSlave030.cpp)
-#target_link_libraries(TUeES030 ${soem_LIBRARIES})
-#add_dependencies(TUeES030 ${PROJECT_NAME}_generate_messages_cpp)
+orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeEthercatSlave030.cpp)
+target_link_libraries(TUeES030 ${soem_LIBRARIES})
 
-orocos_generate_package(
-  INCLUDE_DIRS include
-) 
+orocos_generate_package() 

@@ -114,6 +114,7 @@ namespace soem_beckhoff_drivers {
 
         void update();
         bool configure();
+        bool start();
         void read_encoders();
         void read_currents();
         void read_caliphers();

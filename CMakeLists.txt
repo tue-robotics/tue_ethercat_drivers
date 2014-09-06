@@ -21,5 +21,8 @@ orocos_use_package(soem_master)
 
 orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeEthercatSlave030.cpp)
 target_link_libraries(TUeES030 ${soem_LIBRARIES})
+# does not build:
+#orocos_plugin(DummyDrivers src/soem_beckhoff_drivers.cpp src/DummyDrivers.cpp)
+#target_link_libraries(DummyDrivers ${soem_LIBRARIES})
 
 orocos_generate_package() 

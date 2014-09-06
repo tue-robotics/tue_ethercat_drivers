@@ -338,6 +338,10 @@ void TueETHERCAT::write_analog_out(float val1, float val2) {
 
 }
 
+void TueETHERCAT::stop() {
+	return;
+}
+
 namespace {
 soem_master::SoemDriver* createTueETHERCAT(ec_slavet* mem_loc) {
     return new TueETHERCAT(mem_loc);

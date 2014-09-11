@@ -25,11 +25,11 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "TUeEthercatSlave030.hpp"
+#include "TUeES030.hpp"
 
 using namespace soem_beckhoff_drivers;
 
-TueETHERCAT::TueETHERCAT(ec_slavet* mem_loc) :
+TUeES030::TUeES030(ec_slavet* mem_loc) :
 	soem_master::SoemDriver(mem_loc), 
             port_out_digitalIns("digitalIns"),
             port_out_encoder1("encoder1"),
@@ -50,14 +50,14 @@ TueETHERCAT::TueETHERCAT(ec_slavet* mem_loc) :
 			std::string("Services for custom EtherCat ") + std::string(
 					m_datap->name) + std::string(" module"));
 
-    m_service->addOperation("write_pwm", &TueETHERCAT::write_pwm, this, RTT::OwnThread).doc("Write pwm duty values");
-    m_service->addOperation("write_analog_out", &TueETHERCAT::write_analog_out, this, RTT::OwnThread).doc("Write analog out values");
-    m_service->addOperation("read_encoders", &TueETHERCAT::read_encoders, this, RTT::OwnThread).doc("Read encoder values");
-    m_service->addOperation("read_currents", &TueETHERCAT::read_currents, this, RTT::OwnThread).doc("Read current values");
-    m_service->addOperation("read_caliphers", &TueETHERCAT::read_caliphers, this, RTT::OwnThread).doc("Read calipher values");
-    m_service->addOperation("read_forces", &TueETHERCAT::read_forces, this, RTT::OwnThread).doc("Read force sensor values");
-    m_service->addOperation("read_positions", &TueETHERCAT::read_positions, this, RTT::OwnThread).doc("Read position sensor values");
-    m_service->addOperation("read_time_stamp", &TueETHERCAT::read_time_stamp, this, RTT::OwnThread).doc("Read time stamp");
+    m_service->addOperation("write_pwm", &TUeES030::write_pwm, this, RTT::OwnThread).doc("Write pwm duty values");
+    m_service->addOperation("write_analog_out", &TUeES030::write_analog_out, this, RTT::OwnThread).doc("Write analog out values");
+    m_service->addOperation("read_encoders", &TUeES030::read_encoders, this, RTT::OwnThread).doc("Read encoder values");
+    m_service->addOperation("read_currents", &TUeES030::read_currents, this, RTT::OwnThread).doc("Read current values");
+    m_service->addOperation("read_caliphers", &TUeES030::read_caliphers, this, RTT::OwnThread).doc("Read calipher values");
+    m_service->addOperation("read_forces", &TUeES030::read_forces, this, RTT::OwnThread).doc("Read force sensor values");
+    m_service->addOperation("read_positions", &TUeES030::read_positions, this, RTT::OwnThread).doc("Read position sensor values");
+    m_service->addOperation("read_time_stamp", &TUeES030::read_time_stamp, this, RTT::OwnThread).doc("Read time stamp");
 
     m_service->addPort(port_out_digitalIns).doc("");
     m_service->addPort(port_out_encoder1).doc("");
@@ -90,9 +90,7 @@ TueETHERCAT::TueETHERCAT(ec_slavet* mem_loc) :
     
 }
 
-bool TueETHERCAT::configure() {
-	
-    log(Warning) << "Configuring TUeES030" << endlog();
+bool TUeES030::configure() {
 	
     // initialize variables
     enablestatus = false;
@@ -111,8 +109,7 @@ bool TueETHERCAT::configure() {
 	return true;
 }
 
-bool TueETHERCAT::start() {
-    log(Warning) << "Start TUeES030" << endlog();
+bool TUeES030::start() {
 
     // Properly initialize output struct (set all to zero)
     m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
@@ -123,20 +120,20 @@ bool TueETHERCAT::start() {
     return true;
 }
 
-void TueETHERCAT::update() {
+void TUeES030::update() {
 	
     // check if port_in_enable is connected and read the value
     if (!port_in_enable.connected()) {
         enable = false;
         if (enablestatus == false)	{
-            log(Warning)<<"TueEthercat: Waiting for Enable Signal, port_in_enable is not connected"<<endlog();
+            log(Warning)<<"TUeES030 Driver: Waiting for Enable Signal, port_in_enable is not connected"<<endlog();
             enablestatus = true;
         }
     }
     else if (port_in_enable.connected()) {
         port_in_enable.read(enable);
         if (enablestatus == true) {
-            log(Warning)<<"TueEthercat: Port_in_enable is connected"<<endlog();
+            log(Warning)<<"TUeES030 Driver: Port_in_enable is connected"<<endlog();
 			enablestatus = false;
         }
     }
@@ -154,7 +151,7 @@ void TueETHERCAT::update() {
     read_positions();
     read_time_stamp();
 
-    // get data from orocos and send to ehtercat memory output
+    // get data from orocos and send to ethercat memory output
     // digital outputs
     if (port_in_digitalOuts.connected()) {
         if (port_in_digitalOuts.read(digitalOuts_msg) == NewData) {
@@ -179,12 +176,11 @@ void TueETHERCAT::update() {
     if(enable){
         digitalout.line.enable_1 = 1; // Enable amplifiers
         digitalout.line.enable_2 = 1;
-        //digitalout.port = 3;
         if(printEnabled==0){
             printEnabled++;
             printDisabled=0;
 			if(cntr != 0) {
-                log(Warning)<<"TueEthercat: enable = true -> PWM output enabled" <<endlog();
+                log(Warning)<<"TUeES030 Driver: enable = true -> PWM output enabled" <<endlog();
 			cntr=0;
 			}
         }
@@ -192,9 +188,8 @@ void TueETHERCAT::update() {
     else if(!enable){
         digitalout.line.enable_1 = 0; // Disable amplifiers
         digitalout.line.enable_2 = 0;
-        //digitalout.port = 0;
         if(printDisabled==0){
-            log(Warning)<<"TueEthercat: enable = false -> PWM output set to zero"<<endlog();
+            log(Warning)<<"TUeES030 Driver: enable = false -> PWM output set to zero"<<endlog();
             printDisabled++;
             printEnabled=0;
             cntr++;
@@ -208,16 +203,16 @@ void TueETHERCAT::update() {
 
     // check for powerchanges
     if (digitalin.line.power_status != digitalin_prev.line.power_status) {
-        if (digitalin.line.power_status) {
-            log(Warning)<< "TueEthercat Status:  Power back up" << endlog();
+        if (!digitalin.line.power_status) {
+            log(Warning)<< "TUeES030 Driver Status:  Power OK" << endlog();
         } else {
-            log(Warning)<< "TueEthercat Status:  Power down" << endlog();
+            log(Warning)<< "TUeES030 Driver Status:  Power down" << endlog();
         }
     }
     digitalin_prev.port = digitalin.port;
 }
 
-void TueETHERCAT::read_encoders(){
+void TUeES030::read_encoders(){
 
     encoder1_msg.value = m_in_tueEthercat->encoder_1;
     encoder2_msg.value = m_in_tueEthercat->encoder_2;
@@ -230,7 +225,7 @@ void TueETHERCAT::read_encoders(){
     //log(Info) << "Angles: ["<< enc1 << ", "<< enc2 << ", " << enc3 << "]" << endlog();
 }
 
-void TueETHERCAT::read_currents(){
+void TUeES030::read_currents(){
 
     float current1 = (float) m_in_tueEthercat->current_1;
     float current2 = (float) m_in_tueEthercat->current_2;
@@ -244,7 +239,7 @@ void TueETHERCAT::read_currents(){
     port_out_currents.write(currents_msg);
 }
 
-void TueETHERCAT::read_caliphers(){
+void TUeES030::read_caliphers(){
 
     caliphers_msg.values[0] = (float) m_in_tueEthercat->calipher_1;
     caliphers_msg.values[1] = (float) m_in_tueEthercat->calipher_2;
@@ -252,7 +247,7 @@ void TueETHERCAT::read_caliphers(){
     port_out_caliphers.write(caliphers_msg);
 }
 
-void TueETHERCAT::read_forces(){
+void TUeES030::read_forces(){
 		
     float force1 = (float) m_in_tueEthercat->force_1;
     float force2 = (float) m_in_tueEthercat->force_2;
@@ -267,7 +262,7 @@ void TueETHERCAT::read_forces(){
 	//log(Warning) << "Forces: ["<< force1 << ", "<< force2 << ", " << force3 << "]" << endlog();
 }
 
-void TueETHERCAT::read_positions(){
+void TUeES030::read_positions(){
 
     positionSensors_msg.values[0] = (float) m_in_tueEthercat->position_1;
     positionSensors_msg.values[1] = (float) m_in_tueEthercat->position_2;
@@ -278,14 +273,14 @@ void TueETHERCAT::read_positions(){
     // log(Info) << "Positions: ["<< position1 << ", "<< position2 << ", " << position3 << "]" << endlog();
 }
 
-void TueETHERCAT::read_time_stamp(){
+void TUeES030::read_time_stamp(){
 
     timeStamp_msg.value = m_in_tueEthercat->time_stamp;
     port_out_timeStamp.write(timeStamp_msg);
     //log(Warning) << "Time Stamp: " << timeSt << endlog();
 }
 
-void TueETHERCAT::write_pwm(float val1, float val2, float val3) {
+void TUeES030::write_pwm(float val1, float val2, float val3) {
     int16 tmp1 = (int16) val1;
 	int16 tmp2 = (int16) val2;
 	int16 tmp3 = (int16) val3;
@@ -317,7 +312,7 @@ void TueETHERCAT::write_pwm(float val1, float val2, float val3) {
 	//print_counter++;
 }
 
-void TueETHERCAT::write_analog_out(float val1, float val2) {
+void TUeES030::write_analog_out(float val1, float val2) {
     int16 tmp1 = (int16) val1;
     int16 tmp2 = (int16) val2;
 
@@ -337,16 +332,16 @@ void TueETHERCAT::write_analog_out(float val1, float val2) {
 
 }
 
-void TueETHERCAT::stop() {
+void TUeES030::stop() {
 	return;
 }
 
 namespace {
-soem_master::SoemDriver* createTueETHERCAT(ec_slavet* mem_loc) {
-    return new TueETHERCAT(mem_loc);
+soem_master::SoemDriver* createTUeES030(ec_slavet* mem_loc) {
+    return new TUeES030(mem_loc);
 }
 
 const bool registered0 =
 		soem_master::SoemDriverFactory::Instance().registerDriver(
-                "TUeES030", createTueETHERCAT);
+                "TUeES030", createTUeES030);
 }

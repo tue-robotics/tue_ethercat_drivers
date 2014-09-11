@@ -17,12 +17,14 @@ include_directories(${soem_INCLUDE_DIRS})
 
 orocos_use_package(soem_master)
 
-#ros_generate_rtt_typekit(tue_ethercat_drivers)
-
-orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeEthercatSlave030.cpp)
+orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeES030.cpp)
 target_link_libraries(TUeES030 ${soem_LIBRARIES})
-# does not build:
-#orocos_plugin(DummyDrivers src/soem_beckhoff_drivers.cpp src/DummyDrivers.cpp)
-#target_link_libraries(DummyDrivers ${soem_LIBRARIES})
+
+orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020.cpp)
+target_link_libraries(TUeES020 ${soem_LIBRARIES})
+
+# Dummy Drivers
+#orocos_plugin(TUeEC010 src/soem_beckhoff_drivers.cpp src/TUeEC010.cpp)
+#target_link_libraries(TUeEC010 ${soem_LIBRARIES})
 
 orocos_generate_package() 

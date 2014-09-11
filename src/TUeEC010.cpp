@@ -25,7 +25,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "DummyDrivers.hpp"
+#include "TUeEC010.hpp"
 
 using namespace soem_beckhoff_drivers;
 
@@ -50,5 +50,5 @@ soem_master::SoemDriver* createDummy(ec_slavet* mem_loc) {
 
 const bool registered0 =
 		soem_master::SoemDriverFactory::Instance().registerDriver(
-                "EK1100", createDummy);
+                "TUeEC010", createDummy);
 }

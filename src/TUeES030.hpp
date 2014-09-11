@@ -25,8 +25,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TUEETHERCATSLAVE030_H
-#define TUEETHERCATSLAVE030_H
+#ifndef TUEES030_H
+#define TUEES030_H
 
 #include <soem_master/soem_driver_factory.h>
 #include <soem_master/soem_driver.h>
@@ -45,16 +45,17 @@
 using namespace std;
 typedef vector<double> doubles;
 
+// WARNING, the bits are numbered in reversed order
 typedef union PACKED {
     struct PACKED {
-        uint8 power_status:1;
-        uint8 reserved_3:1;
-        uint8 reserved_2:1;
-        uint8 reserved_1:1;
-        uint8 spare_di_4:1;
-        uint8 spare_di_3:1;
+        uint8 spare_di_1:1;		// bit 0
         uint8 spare_di_2:1;
-        uint8 spare_di_1:1;
+        uint8 spare_di_3:1;
+        uint8 spare_di_4:1;
+        uint8 reserved_1:1;
+        uint8 reserved_2:1;
+        uint8 reserved_3:1;
+        uint8 power_status:1;  // bit 7
     }       line;
     uint8   port;
 } digital_in_t;
@@ -80,16 +81,17 @@ typedef struct PACKED {
         uint16 time_stamp;              // Time stamp (1 bit equals 256 ns)
     } in_tueEthercatMemoryt;
 
+// WARNING, the bits are numbered in reversed order
 typedef union PACKED {
-    struct PACKED {
-        uint8 reserved_4:1;
-        uint8 reserved_3:1;
-        uint8 reserved_2:1;
-        uint8 reserved_1:1;
-        uint8 spare_do_4:1;
+    struct PACKED {	
+		uint8 enable_1:1;		// bit 0
+        uint8 enable_2:1;	
         uint8 spare_do_3:1;
-        uint8 enable_2:1;
-        uint8 enable_1:1;
+        uint8 spare_do_4:1;	
+        uint8 reserved_1:1;
+        uint8 reserved_2:1;
+        uint8 reserved_3:1;
+        uint8 reserved_4:1;		// bit 7
     }       line;
     uint8   port;
 } digital_out_t;
@@ -107,10 +109,10 @@ using namespace RTT;
 
 namespace soem_beckhoff_drivers {
 
-    class TueETHERCAT: public soem_master::SoemDriver {
+    class TUeES030: public soem_master::SoemDriver {
     public:
-        TueETHERCAT(ec_slavet* mem_loc);
-        ~TueETHERCAT() {};
+        TUeES030(ec_slavet* mem_loc);
+        ~TUeES030() {};
 
         void update();
         bool configure();

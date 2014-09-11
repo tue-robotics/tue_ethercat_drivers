@@ -25,8 +25,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef DUMMYDRIVERS_H
-#define DUMMYDRIVERS_H
+#ifndef TUEEC010_H
+#define TUEEC010_H
 
 #include <soem_master/soem_driver_factory.h>
 #include <soem_master/soem_driver.h>

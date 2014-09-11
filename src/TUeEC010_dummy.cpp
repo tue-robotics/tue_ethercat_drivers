@@ -20,7 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "TUeEC010.hpp"
+#include "TUeEC010_dummy.hpp"
 
 using namespace soem_beckhoff_drivers;
 

@@ -20,34 +20,34 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "TUeEC010.hpp"
+#include "EK1100_dummy.hpp"
 
 using namespace soem_beckhoff_drivers;
 
-TUeEC010::TUeEC010(ec_slavet* mem_loc) :
+EK1100::EK1100(ec_slavet* mem_loc) :
 	soem_master::SoemDriver(mem_loc), 
 	{}
 
-bool TUeEC010::start() {
+bool EK1100::start() {
 	log(Warning) << "Starting DummyDriver" << endlog();
 	return true;
 }
 
-bool TUeEC010::configure() {	
+bool EK1100::configure() {	
     log(Warning) << "Configuring DummyDriver" << endlog();
 	return true;
 }
 
-void TUeEC010::update() {
+void EK1100::update() {
 	log(Warning) << "Updating DummyDriver" << endlog();
 }
 
 namespace {
-soem_master::SoemDriver* createTUeEC010(ec_slavet* mem_loc) {
-    return new TUeEC010(mem_loc);
+soem_master::SoemDriver* createEK1100(ec_slavet* mem_loc) {
+    return new EK1100(mem_loc);
 }
 
 const bool registered0 =
 		soem_master::SoemDriverFactory::Instance().registerDriver(
-                "TUeEC010", createTUeEC010);
+                "EK1100", createEK1100);
 }

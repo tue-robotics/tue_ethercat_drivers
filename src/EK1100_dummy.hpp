@@ -20,8 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TUEEC010_H
-#define TUEEC010_H
+#ifndef EK1100_H
+#define EK1100_H
 
 #include <soem_master/soem_driver_factory.h>
 #include <soem_master/soem_driver.h>
@@ -36,10 +36,10 @@ using namespace RTT;
 
 namespace soem_beckhoff_drivers {
 
-    class TUeEC010: public soem_master::SoemDriver {
+    class EK1100: public soem_master::SoemDriver {
     public:
-        TUeEC010(ec_slavet* mem_loc);
-        ~TUeEC010() {};
+        EK1100(ec_slavet* mem_loc);
+        ~EK1100() {};
 
         void update();
         bool configure();

@@ -90,36 +90,37 @@ TueETHERCAT::TueETHERCAT(ec_slavet* mem_loc) :
     
 }
 
-bool TueETHERCAT::start() {
-	log(Warning) << "Start TUeES030" << endlog();
-	return true;
-}
-
 bool TueETHERCAT::configure() {
 	
     log(Warning) << "Configuring TUeES030" << endlog();
 	
     // initialize variables
-    //enablestatus = false;
-	//enable = false;
+    enablestatus = false;
+	enable = false;
 	
-    //cntr = 1;
-    //printEnabled = 0;
-    //printDisabled = 1;
+    cntr = 1;
+    printEnabled = 0;
+    printDisabled = 1;
 
-    //digitalin.port = 0;
-    //digitalin_prev.port = 0;
-    //digitalin_prev.line.power_status = 1;
-    //digitalout.port = 0;
+    digitalin.port = 0;
+    digitalin_prev.port = 0;
+    digitalin_prev.line.power_status = 1;
+    digitalout.port = 0;
     
-    // Properly initialize output struct (set all to zero)
-    //m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
-    //m_out_tueEthercat->digital_out = digitalout;
-    //write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
-    //write_analog_out((float)(0.0),(float)(0.0));
-
-	//print_counter = 0;
+	print_counter = 0;
 	return true;
+}
+
+bool TueETHERCAT::start() {
+    log(Warning) << "Start TUeES030" << endlog();
+
+    // Properly initialize output struct (set all to zero)
+    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
+    m_out_tueEthercat->digital_out = digitalout;
+    write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
+    write_analog_out((float)(0.0),(float)(0.0));
+
+    return true;
 }
 
 void TueETHERCAT::update() {
@@ -142,7 +143,8 @@ void TueETHERCAT::update() {
 
     // get the pointers to the communication structs
     m_in_tueEthercat = ((in_tueEthercatMemoryt*) (m_datap->inputs));
-    	
+    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
+	
     // read the data from the ethercat memory input and send to orocos
     digitalin = m_in_tueEthercat->digital_in;
     read_encoders();
@@ -177,7 +179,7 @@ void TueETHERCAT::update() {
     if(enable){
         digitalout.line.enable_1 = 1; // Enable amplifiers
         digitalout.line.enable_2 = 1;
-        digitalout.port = 1;
+        //digitalout.port = 3;
         if(printEnabled==0){
             printEnabled++;
             printDisabled=0;
@@ -190,7 +192,7 @@ void TueETHERCAT::update() {
     else if(!enable){
         digitalout.line.enable_1 = 0; // Disable amplifiers
         digitalout.line.enable_2 = 0;
-        digitalout.port = 0;
+        //digitalout.port = 0;
         if(printDisabled==0){
             log(Warning)<<"TueEthercat: enable = false -> PWM output set to zero"<<endlog();
             printDisabled++;
@@ -213,9 +215,6 @@ void TueETHERCAT::update() {
         }
     }
     digitalin_prev.port = digitalin.port;
-    
-    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
-    
 }
 
 void TueETHERCAT::read_encoders(){
@@ -349,5 +348,5 @@ soem_master::SoemDriver* createTueETHERCAT(ec_slavet* mem_loc) {
 
 const bool registered0 =
 		soem_master::SoemDriverFactory::Instance().registerDriver(
-                "EPC ESRA FGPA Ethercat Slave", createTueETHERCAT);
+                "TUeES030", createTueETHERCAT);
 }

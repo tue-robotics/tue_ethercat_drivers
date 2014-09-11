@@ -1,11 +1,6 @@
 /***************************************************************************
- tag: Sava Marinkov, Ruud van den Bogaert,  Fri Mar 23 12:44:00 CET 2011  soem_armEthercat.cpp
-
- soem_armEthercat.cpp -  dedicated ethercat module TU/e
- -------------------
- begin                : Fri November 23 2012
- copyright            : (C) 2012 Sava Marinkov & Ruud van den Bogaert & Max Baeten
- email                : s.marinkov@student.tue.nl , r.v.d.bogaert@tue.nl
+ tag: Sava Marinkov , Ruud van den Bogaert, Max Baeten
+ Driver for TUeES020
 
  ***************************************************************************
  *   This library is free software; you can redistribute it and/or         *

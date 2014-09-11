@@ -90,7 +90,14 @@ bool TUeES020::configure() {
    
 	disable_motor_register = 255; // Start with all motors disabled
 
-    // This is to avoid random outputs at startup
+
+        
+	return true;
+}
+
+bool TUeES020::start() {
+	
+	// This is to avoid random outputs at startup
     if (!setOutputToZero) {
         log(Info) << "Doing extra output update to start with zero outputs" << endlog();
         m_out_armEthercat = ((out_armEthercatMemoryt*) (m_datap->outputs));
@@ -98,8 +105,7 @@ bool TUeES020::configure() {
         write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
         setOutputToZero = true;
     }
-        
-	return true;
+	
 }
 
 void TUeES020::update() {
@@ -250,6 +256,9 @@ void TUeES020::write_pwm(float val1, float val2, float val3) {
 	m_out_armEthercat->pwm_duty_motor_1 = tmp1;
 	m_out_armEthercat->pwm_duty_motor_2 = tmp2;
 	m_out_armEthercat->pwm_duty_motor_3 = tmp3;
+}
+
+void TUeES020::stop() {
 }
 
 namespace {

@@ -37,7 +37,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
             port_out_analogIns("analogIns"),
             port_out_timeStamp("timeStamp"),
             port_in_digitalOuts("digitalOuts"),
-            port_in_pwmDutyMotors("pwmDutyMotorsIn"),
+            port_in_pwmDutyMotors("pwmDutyMotors"),
             port_in_analogOuts("analogOuts"),
             port_in_enable("enablePort"){
 

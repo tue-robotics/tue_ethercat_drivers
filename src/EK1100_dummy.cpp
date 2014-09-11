@@ -25,21 +25,22 @@
 using namespace soem_beckhoff_drivers;
 
 EK1100::EK1100(ec_slavet* mem_loc) :
-	soem_master::SoemDriver(mem_loc), 
-	{}
+	soem_master::SoemDriver(mem_loc) {
+		m_service->doc(std::string(m_datap->name)); 
+	}
 
 bool EK1100::start() {
-	log(Warning) << "Starting DummyDriver" << endlog();
 	return true;
 }
 
 bool EK1100::configure() {	
-    log(Warning) << "Configuring DummyDriver" << endlog();
 	return true;
 }
 
 void EK1100::update() {
-	log(Warning) << "Updating DummyDriver" << endlog();
+}
+
+void EK1100::stop() {
 }
 
 namespace {

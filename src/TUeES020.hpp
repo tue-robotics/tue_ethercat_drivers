@@ -69,13 +69,15 @@ typedef struct PACKED {
 			TUeES020(ec_slavet* mem_loc);
 			~TUeES020() {};
 
-			void update();
 			bool configure();
+			bool start();
+			void update();
+			void stop();			
 			void write_pwm(float val1,float val2,float val3);
 			void read_encoders();
 			void read_forces();
 			void read_positions();
-			void stop();
+
 
 		private:
 			// Declaring of 

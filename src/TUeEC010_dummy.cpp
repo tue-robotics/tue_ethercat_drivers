@@ -25,21 +25,22 @@
 using namespace soem_beckhoff_drivers;
 
 TUeEC010::TUeEC010(ec_slavet* mem_loc) :
-	soem_master::SoemDriver(mem_loc), 
-	{}
+	soem_master::SoemDriver(mem_loc) { 
+		m_service->doc(std::string(m_datap->name));
+		}
 
 bool TUeEC010::start() {
-	log(Warning) << "Starting DummyDriver" << endlog();
 	return true;
 }
 
-bool TUeEC010::configure() {	
-    log(Warning) << "Configuring DummyDriver" << endlog();
+bool TUeEC010::configure() {
 	return true;
 }
 
 void TUeEC010::update() {
-	log(Warning) << "Updating DummyDriver" << endlog();
+}
+
+void TUeEC010::stop() {
 }
 
 namespace {

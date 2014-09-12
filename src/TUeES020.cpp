@@ -31,7 +31,7 @@ TUeES020::TUeES020(ec_slavet* mem_loc) :
 			port_out_encoderAngle3("encoderAngle3"),
 			port_out_positionSensors("positionSensors"),
   			port_out_forceSensors("forceSensors"),
-            port_in_pwmDutyMotors("pwmDutyMotorsIn"),
+            port_in_pwmDutyMotors("pwmDutyMotors"),
             port_in_enable("enablePort"){
 
 		m_service->doc(
@@ -106,6 +106,7 @@ bool TUeES020::start() {
         setOutputToZero = true;
     }
 	
+	return true;
 }
 
 void TUeES020::update() {

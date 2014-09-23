@@ -163,7 +163,7 @@ void TUeES030::update() {
     // analog outputs
     if (port_in_analogOuts.connected()) {
         if (port_in_analogOuts.read(analogOuts_msg) == NewData) {
-            write_analog_out(analogOuts_msg.values[0],analogOuts_msg.values[2]);
+            write_analog_out(analogOuts_msg.values[0],analogOuts_msg.values[1]);
         }
     }
 

@@ -47,14 +47,15 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
 
     m_service->addOperation("write_pwm", &TUeES030::write_pwm, this, RTT::OwnThread).doc("Write pwm duty values");
     m_service->addOperation("write_analog_out", &TUeES030::write_analog_out, this, RTT::OwnThread).doc("Write analog out values");
-    m_service->addOperation("read_encoders", &TUeES030::read_encoders, this, RTT::OwnThread).doc("Read encoder values");
-    m_service->addOperation("read_currents", &TUeES030::read_currents, this, RTT::OwnThread).doc("Read current values");
+	m_service->addOperation("read_digital_ins", &TUeES030::read_digital_ins, this, RTT::OwnThread).doc("Read digital inputs");
+	m_service->addOperation("read_encoders", &TUeES030::read_encoders, this, RTT::OwnThread).doc("Read encoder values");
+	m_service->addOperation("read_currents", &TUeES030::read_currents, this, RTT::OwnThread).doc("Read current values");
     m_service->addOperation("read_caliphers", &TUeES030::read_caliphers, this, RTT::OwnThread).doc("Read calipher values");
     m_service->addOperation("read_forces", &TUeES030::read_forces, this, RTT::OwnThread).doc("Read force sensor values");
     m_service->addOperation("read_positions", &TUeES030::read_positions, this, RTT::OwnThread).doc("Read position sensor values");
     m_service->addOperation("read_time_stamp", &TUeES030::read_time_stamp, this, RTT::OwnThread).doc("Read time stamp");
 
-    m_service->addPort(port_out_digitalIns).doc("");
+	m_service->addPort(port_out_digitalIns).doc("");
     m_service->addPort(port_out_encoder1).doc("");
     m_service->addPort(port_out_encoder2).doc("");
     m_service->addPort(port_out_encoder3).doc("");
@@ -137,62 +138,45 @@ void TUeES030::update() {
     m_in_tueEthercat = ((in_tueEthercatMemoryt*) (m_datap->inputs));
     m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
 	
-    // read the data from the ethercat memory input and send to orocos
-    digitalin = m_in_tueEthercat->digital_in;
+	// read the data from the ethercat memory input and send to orocos
+	read_digital_ins();
     read_encoders();
+	read_time_stamp();
     read_currents();
     read_caliphers();
     read_forces();
-    read_positions();
-    read_time_stamp();
+	read_positions();
 
-    // get data from orocos and send to ethercat memory output
-    // digital outputs
-    if (port_in_digitalOuts.connected()) {
-        if (port_in_digitalOuts.read(digitalOuts_msg) == NewData) {
-            digitalout.line.spare_do_3 = digitalIns_msg.values[0];
-            digitalout.line.spare_do_4 = digitalIns_msg.values[1];
-        }
-    }
-    // pwm duty motors
-    if (port_in_pwmDutyMotors.connected()) {
-		if (port_in_pwmDutyMotors.read(pwmDutyMotors_msg) == NewData) {
-            write_pwm((pwmDutyMotors_msg.values[0]),(pwmDutyMotors_msg.values[1]),(pwmDutyMotors_msg.values[2]));
-		}
-    }
-    // analog outputs
-    if (port_in_analogOuts.connected()) {
-        if (port_in_analogOuts.read(analogOuts_msg) == NewData) {
-            write_analog_out(analogOuts_msg.values[0],analogOuts_msg.values[1]);
-        }
-    }
-
-    // Shut down amplifiers if enable signal from orocos is false or connection is lost
-    if(enable){
-        digitalout.line.enable_1 = 1; // Enable amplifiers
-        digitalout.line.enable_2 = 1;
-        if(printEnabled==0){
-            printEnabled++;
-            printDisabled=0;
-			if(cntr != 0) {
-                log(Warning)<<"TUeES030 Driver: enable = true -> PWM output enabled" <<endlog();
-			cntr=0;
+	// enable = true, all outputs are send to Slave
+	// enable = fales, all outputs set to zero
+	if (enable) {
+		// digital outputs
+		if (port_in_digitalOuts.connected()) {
+			if (port_in_digitalOuts.read(digitalOuts_msg) == NewData) {
+				digitalout.line.enable_1 = digitalOuts_msg.values[0];
+				digitalout.line.enable_2 = digitalOuts_msg.values[1];
+				digitalout.line.spare_do_3 = digitalOuts_msg.values[2];
+				digitalout.line.spare_do_4 = digitalOuts_msg.values[3];
 			}
-        }
-    }
-    else if(!enable){
-        digitalout.line.enable_1 = 0; // Disable amplifiers
-        digitalout.line.enable_2 = 0;
-        if(printDisabled==0){
-            log(Warning)<<"TUeES030 Driver: enable = false -> PWM output set to zero"<<endlog();
-            printDisabled++;
-            printEnabled=0;
-            cntr++;
-        }
-        write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
-        write_analog_out((float)(0.0),(float)(0.0));
-    }
-	
+		}
+		// pwm duty motors
+		if (port_in_pwmDutyMotors.connected()) {
+			if (port_in_pwmDutyMotors.read(pwmDutyMotors_msg) == NewData) {
+				write_pwm((pwmDutyMotors_msg.values[0]),(pwmDutyMotors_msg.values[1]),(pwmDutyMotors_msg.values[2]));
+			}
+		}
+		// analog outputs
+		if (port_in_analogOuts.connected()) {
+			if (port_in_analogOuts.read(analogOuts_msg) == NewData) {
+				write_analog_out(analogOuts_msg.values[0],analogOuts_msg.values[1]);
+			}
+		}
+	}
+	else {
+		digitalout.port = 0;
+		write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
+		write_analog_out((float)(0.0),(float)(0.0));
+	}
     // set digital outputs to ethercat memory output
     m_out_tueEthercat->digital_out = digitalout;
 
@@ -200,11 +184,24 @@ void TUeES030::update() {
     if (digitalin.line.power_status != digitalin_prev.line.power_status) {
         if (!digitalin.line.power_status) {
             log(Warning)<< "TUeES030 Driver Status:  Power OK" << endlog();
-        } else {
+		}
+		else {
             log(Warning)<< "TUeES030 Driver Status:  Power down" << endlog();
         }
     }
     digitalin_prev.port = digitalin.port;
+}
+
+void TUeES030::read_digital_ins(){
+
+	digitalin = m_in_tueEthercat->digital_in;
+
+	digitalIns_msg.values[0] = digitalin.line.spare_di_1;
+	digitalIns_msg.values[1] = digitalin.line.spare_di_2;
+	digitalIns_msg.values[2] = digitalin.line.spare_di_3;
+	digitalIns_msg.values[3] = digitalin.line.spare_di_4;
+
+	port_out_digitalIns.write(digitalIns_msg);
 }
 
 void TUeES030::read_encoders(){

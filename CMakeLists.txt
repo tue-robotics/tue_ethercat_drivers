@@ -23,6 +23,8 @@ orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeES030.cpp)
 target_link_libraries(TUeES030 ${soem_LIBRARIES})
 orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020.cpp)
 target_link_libraries(TUeES020 ${soem_LIBRARIES})
+#orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020_2.cpp)
+#target_link_libraries(TUeES020 ${soem_LIBRARIES})
 
 # Dummy Drivers
 orocos_plugin(TUeEC010 src/soem_beckhoff_drivers.cpp src/TUeEC010_dummy.cpp)

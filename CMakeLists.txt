@@ -19,17 +19,15 @@ file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
 orocos_use_package(soem_master)
 
-orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeES030.cpp)
+orocos_plugin(TUeES030 src/soem_beckhoff_drivers.cpp src/TUeES030.cpp ${HEADER_FILES})
 target_link_libraries(TUeES030 ${soem_LIBRARIES})
-orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020.cpp)
+orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020.cpp ${HEADER_FILES})
 target_link_libraries(TUeES020 ${soem_LIBRARIES})
-#orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020_2.cpp)
-#target_link_libraries(TUeES020 ${soem_LIBRARIES})
 
 # Dummy Drivers
-orocos_plugin(TUeEC010 src/soem_beckhoff_drivers.cpp src/TUeEC010_dummy.cpp)
+orocos_plugin(TUeEC010 src/soem_beckhoff_drivers.cpp src/TUeEC010_dummy.cpp ${HEADER_FILES})
 target_link_libraries(TUeEC010 ${soem_LIBRARIES})
-orocos_plugin(EK1100 src/soem_beckhoff_drivers.cpp src/EK1100_dummy.cpp)
+orocos_plugin(EK1100 src/soem_beckhoff_drivers.cpp src/EK1100_dummy.cpp ${HEADER_FILES})
 target_link_libraries(EK1100 ${soem_LIBRARIES})
 
 orocos_generate_package() 

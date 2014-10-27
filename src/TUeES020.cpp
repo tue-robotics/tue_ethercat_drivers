@@ -260,6 +260,13 @@ void TUeES020::write_pwm(float val1, float val2, float val3) {
 }
 
 void TUeES020::stop() {
+	
+	log(Warning) << "TUeES020: Stopped" << endlog();
+	
+    delete m_in_armEthercat;
+    delete m_out_armEthercat;
+
+	return;
 }
 
 namespace {

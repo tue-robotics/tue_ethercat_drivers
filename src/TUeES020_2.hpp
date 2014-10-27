@@ -97,10 +97,10 @@ using namespace RTT;
 
 namespace soem_beckhoff_drivers {
 
-    class TUeES020: public soem_master::SoemDriver {
+    class TUeES020B: public soem_master::SoemDriver {
     public:
-        TUeES020(ec_slavet* mem_loc);
-        ~TUeES020() {};
+        TUeES020B(ec_slavet* mem_loc);
+        ~TUeES020B() {};
 
         void update();
         bool configure();
@@ -121,6 +121,7 @@ namespace soem_beckhoff_drivers {
         uint16 cntr;
         bool enablestatus;
         bool enable;
+        bool port_enabled_was_connected;
         digital_out_t digitalout;
         digital_in_t digitalin;
         digital_in_t digitalin_prev;

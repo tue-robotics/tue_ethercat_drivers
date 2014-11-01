@@ -26,11 +26,15 @@ using namespace soem_beckhoff_drivers;
 
 TUeES020::TUeES020(ec_slavet* mem_loc) :
 	soem_master::SoemDriver(mem_loc), 
-			port_out_encoderAngle1("encoderAngle1"),
-			port_out_encoderAngle2("encoderAngle2"),
-			port_out_encoderAngle3("encoderAngle3"),
-			port_out_positionSensors("positionSensors"),
-  			port_out_forceSensors("forceSensors"),
+            port_out_digitalIns("digitalIns"),
+            port_out_encoder1("encoder1"),
+            port_out_encoder2("encoder2"),
+            port_out_encoder3("encoder3"),
+            port_out_forceSensors("forceSensors"),
+            port_out_positionSensors("positionSensors"),
+            port_out_analogIns("analogIns"),
+            port_out_timeStamp("timeStamp"),
+            port_in_digitalOuts("digitalOuts"),
             port_in_pwmDutyMotors("pwmDutyMotors"),
             port_in_enable("enablePort"){
 
@@ -38,198 +42,190 @@ TUeES020::TUeES020(ec_slavet* mem_loc) :
 			std::string("Services for custom EtherCat ") + std::string(
 					m_datap->name) + std::string(" module"));
 
-	m_service->addOperation("write_pwm", &TUeES020::write_pwm, this, RTT::OwnThread).doc("Write pwm duty values");
+    m_service->addOperation("write_pwm", &TUeES020::write_pwm, this, RTT::OwnThread).doc("Write pwm duty values");
+	m_service->addOperation("read_digital_ins", &TUeES020::read_digital_ins, this, RTT::OwnThread).doc("Read digital inputs");
 	m_service->addOperation("read_encoders", &TUeES020::read_encoders, this, RTT::OwnThread).doc("Read encoder values");
- 	m_service->addOperation("read_forces", &TUeES020::read_forces, this, RTT::OwnThread).doc("Read force sensor values");
- 	m_service->addOperation("read_positions", &TUeES020::read_positions, this, RTT::OwnThread).doc("Read position sensor values");
+    m_service->addOperation("read_forces", &TUeES020::read_forces, this, RTT::OwnThread).doc("Read force sensor values");
+    m_service->addOperation("read_positions", &TUeES020::read_positions, this, RTT::OwnThread).doc("Read position sensor values");
+    m_service->addOperation("read_time_stamp", &TUeES020::read_time_stamp, this, RTT::OwnThread).doc("Read time stamp");
 
-	m_service->addPort(port_out_encoderAngle1).doc("");
-	m_service->addPort(port_out_encoderAngle2).doc("");
-	m_service->addPort(port_out_encoderAngle3).doc("");
+	m_service->addPort(port_out_digitalIns).doc("");
+    m_service->addPort(port_out_encoder1).doc("");
+    m_service->addPort(port_out_encoder2).doc("");
+    m_service->addPort(port_out_encoder3).doc("");
+    m_service->addPort(port_out_forceSensors).doc("");
 	m_service->addPort(port_out_positionSensors).doc("");
- 	m_service->addPort(port_out_forceSensors).doc("");
-	m_service->addPort(port_in_pwmDutyMotors).doc("");
+    m_service->addPort(port_out_analogIns).doc("");
+    m_service->addPort(port_out_timeStamp).doc("");
+    m_service->addPort(port_in_digitalOuts).doc("");
+    m_service->addPort(port_in_pwmDutyMotors).doc("");
     m_service->addPort(port_in_enable).doc("");
 
-	positionSensors_msg.values.assign(3, 0.0);
- 	forceSensors_msg.values.assign(3, 0.0);
-	pwmDutyMotors_msg.values.assign(3, 0.0);
-	encoderAngle1_msg.value = 0;
-	encoderAngle2_msg.value = 0;
-	encoderAngle3_msg.value = 0;
+    digitalIns_msg.values.assign(4,0);
+    encoder1_msg.value = 0;
+    encoder2_msg.value = 0;
+    encoder3_msg.value = 0;
+    forceSensors_msg.values.assign(3, 0.0);
+    positionSensors_msg.values.assign(3, 0.0);
+    analogIns_msg.values.assign(2,0.0);
+    timeStamp_msg.value = 0;
+    digitalOuts_msg.values.assign(2,0.0);
+    pwmDutyMotors_msg.values.assign(3,0.0);
+    
 }
 
 bool TUeES020::configure() {
 	
-	positionSensors.assign(3, 0.0);
-  	forceSensors.assign(3, 0.0);
-	pwmDutyMotors.assign(3, 0.0);
-	enc1 = 0;
-	enc2 = 0;
-	enc3 = 0;
+    // initialize variables
+    enablestatus = false;
+	enable = false;
+	port_enabled_was_connected = false;
 	
-	setOutputToZero = false;
-	enablestatus = true;
-	
-    cntr = 0;	
-	heartbeat = 0;
+    cntr = 1;
     printEnabled = 0;
     printDisabled = 1;
-    j=0;
-    statusregister_prev = 0;
+
+    digitalin.port = 0;
+    digitalin_prev.port = 0;
+    digitalout.port = 0;
     
-    // in the controlregister, the first bit toggles the heartbeat, the second bit the emergency button detection, and the third bit the ramp
-    //controlregister = 0x00;	// heart beat on 		+ emergency button detection on  		+ ramp on
-    //controlregister = 0x01;	// heart beat off 		+ emergency button detection on  		+ ramp on
-	//controlregister = 0x02;   // heart beat on 		+ emergency button detection off  		+ ramp on
-	//controlregister = 0x03;	// heart beat off 		+ emergency button detection off    	+ ramp on
-	controlregister   = 0x04;	// heart beat on 		+ emergency button detection on   		+ ramp off
-    //controlregister = 0x05;	// heart beat off 		+ emergency button detection on  		+ ramp off
-	//controlregister = 0x06;   // heart beat on 		+ emergency button detection off  		+ ramp off
-	//controlregister = 0x07;	// heart beat off 		+ emergency button detection off   		+ ramp off
-   
-	disable_motor_register = 255; // Start with all motors disabled
-
-
-        
+	print_counter = 0;
 	return true;
 }
 
 bool TUeES020::start() {
-	
-	// This is to avoid random outputs at startup
-    if (!setOutputToZero) {
-        log(Info) << "Doing extra output update to start with zero outputs" << endlog();
-        m_out_armEthercat = ((out_armEthercatMemoryt*) (m_datap->outputs));
-        log(Info) << "PWM Values before initialization are " << m_out_armEthercat->pwm_duty_motor_1 << "\t" << m_out_armEthercat->pwm_duty_motor_2 << "\t" << m_out_armEthercat->pwm_duty_motor_3 << endlog();
-        write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
-        setOutputToZero = true;
-    }
-	
-	return true;
+
+    // Properly initialize output struct (set all to zero)
+    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
+    m_out_tueEthercat->digital_out = digitalout;
+    write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
+
+    return true;
 }
 
 void TUeES020::update() {
 	
-    if (port_in_enable.connected()) {
+    // check if port_in_enable is connected and read the value // port_enabled_was_connected boolean makes sure this warning is not printed at boot
+    if (!port_in_enable.connected() && port_enabled_was_connected) {
+        enable = false;
+        if (enablestatus == false)	{
+            log(Warning)<<"TUeES020 Driver: Waiting for Enable Signal, port_in_enable is not connected"<<endlog();
+            enablestatus = true;
+        }
+    }
+    else if (port_in_enable.connected()) {
+		port_enabled_was_connected = true;
         port_in_enable.read(enable);
-        if (enablestatus == true)
-			log(Info)<<"TUeES020 Driver Port_in_enable is connected"<<endlog();
-        enablestatus = false;
-		}
-		
-    else if (!port_in_enable.connected()) {
-		if (enablestatus == false)	{ 
-			log(Warning)<<"TUeES020 Driver Waiting for Enable Signal, port_in_enable is not connected"<<endlog();
-			enablestatus = true;
-		}
+        if (enablestatus == true) {
+            log(Warning)<<"TUeES020 Driver: Port_in_enable is connected"<<endlog();
+			enablestatus = false;
+        }
     }
-    
-    // heartbeat
-    heartbeat++;
-    if (heartbeat > 250)
-	{
-		heartbeat = 0;  
-	}	
-    
-    m_out_armEthercat->heart_beat = heartbeat;
-	m_out_armEthercat->control_register = controlregister;
-	m_out_armEthercat->disable_motor_register = disable_motor_register;														
 
-	m_in_armEthercat = ((in_armEthercatMemoryt*) (m_datap->inputs));
-	m_out_armEthercat = ((out_armEthercatMemoryt*) (m_datap->outputs));
+    // get the pointers to the communication structs
+    m_in_tueEthercat = ((in_tueEthercatMemoryt*) (m_datap->inputs));
+    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
 	
+	// read the data from the ethercat memory input and send to orocos
+	read_digital_ins();
+    read_encoders();
+	read_time_stamp();
+    read_forces();
 	read_positions();
- 	read_forces();
-	read_encoders();
-		
-	if (port_in_pwmDutyMotors.connected()) {
-		if (port_in_pwmDutyMotors.read(pwmDutyMotors_msg) == NewData) {
-			write_pwm((pwmDutyMotors_msg.values[0]),(pwmDutyMotors_msg.values[1]),(pwmDutyMotors_msg.values[2]));
-		}
-    }
 
-    // If enable is true no error occured in the system
-    if(enable){
-		disable_motor_register = 0; // Enable amplifiers
-        if(printEnabled==0){
-            printEnabled++;
-            printDisabled=0;
-            if(cntr != 0) {
-				log(Info)<<"TUeES020 Driver enable = true -> PWM output enabled" <<endlog();
-				cntr=0;
+	// enable = true, all outputs are send to Slave
+	// enable = fales, all outputs set to zero
+	if (enable) {
+		// digital outputs
+		if (port_in_digitalOuts.connected()) {
+			if (port_in_digitalOuts.read(digitalOuts_msg) == NewData) {
+				digitalout.line.enable_1 = digitalOuts_msg.values[0];
+				digitalout.line.enable_2 = digitalOuts_msg.values[1];
+				digitalout.line.spare_do_3 = digitalOuts_msg.values[2];
+				digitalout.line.spare_do_4 = digitalOuts_msg.values[3];
 			}
+		}
+		// pwm duty motors
+		if (port_in_pwmDutyMotors.connected()) {
+			if (port_in_pwmDutyMotors.read(pwmDutyMotors_msg) == NewData) {
+				write_pwm((pwmDutyMotors_msg.values[0]),(pwmDutyMotors_msg.values[1]),(pwmDutyMotors_msg.values[2]));
+			}
+		}
+	} else {
+		digitalout.port = 0;
+		write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
+	}
+    // set digital outputs to ethercat memory output
+    m_out_tueEthercat->digital_out = digitalout;
+
+    // check for powerchanges
+    if (digitalin.line.power_status != digitalin_prev.line.power_status) {
+        if (!digitalin.line.power_status) {
+            log(Warning)<< "TUeES020 Driver Status:  Power OK" << endlog();
+		}
+		else {
+            log(Warning)<< "TUeES020 Driver Status:  Power down" << endlog();
         }
     }
-    else if(!enable){
-		disable_motor_register = 255; // Disable amplifiers
-        if(printDisabled==0){
-            log(Info)<<"TUeES020 Driver enable = false -> PWM output set to zero"<<endlog();
-            printDisabled++;
-            printEnabled=0;
-            cntr++;
-        }
-        write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
-    }
-    
-    // status_register warnings
-    statusregister = m_in_armEthercat->status_register;
-    
-    //j++;	
-    if ((statusregister & 0x03) != (statusregister_prev & 0x03)) {		
-		if ((statusregister & 0x03) == 0x00 ) { log(Info)<< "TUeES020 Driver Status:  E_OK" << endlog(); }
-		if ((statusregister & 0x03) == 0x01 ) {
-			if ((statusregister ^ 0X7C) & 0x04 ) { 	log(Info)<< "TUeES020 Driver Status:  E_POWER_DOWN: 5V" << endlog(); }
-			if ((statusregister ^ 0X7C) & 0x08 ) { 	log(Info)<< "TUeES020 Driver Status:  E_POWER_DOWN: 12V" << endlog(); }
-			if ((statusregister ^ 0X7C) & 0x10 ) { 	log(Info)<< "TUeES020 Driver Status:  E_POWER_DOWN: 24V" << endlog(); }
-			if ((statusregister ^ 0X7C) & 0x20 ) { 	log(Info)<< "TUeES020 Driver Status:  E_POWER_DOWN: 1.2V" << endlog(); }
-			if ((statusregister ^ 0X7C) & 0x40 ) { 	log(Info)<< "TUeES020 Driver Status:  E_POWER_DOWN: 1.65V" << endlog(); }
-			}			
-		if ((statusregister & 0x03) == 0x02 ) {	log(Info)<< "TUeES020 Driver Status:  E_COMM_DOWN" << endlog(); }	
-		if ((statusregister & 0x03) == 0x03 ) { log(Error)<< "TUeES020 Driver Status:  E_NO_OP_STATE" << endlog(); }
-	
-		statusregister_prev = statusregister;
-	}      
+    digitalin_prev.port = digitalin.port;
 }
 
-void TUeES020::read_forces(){
-		
-	float force1 = (float) m_in_armEthercat->force_1;
-	float force2 = (float) m_in_armEthercat->force_2;
-	float force3 = (float) m_in_armEthercat->force_3;
-	
-	 forceSensors_msg.values[0] = (force1/2047.0*3.3);   	 //11 bits over 3,3V or 12 bits over 6,6V
-	 forceSensors_msg.values[1] = (force2/2047.0*3.3);   	 //11 bits over 3,3V or 12 bits over 6,6V
-	 forceSensors_msg.values[2] = (force3/2047.0*3.3);   	 //11 bits over 3,3V or 12 bits over 6,6V
+void TUeES020::read_digital_ins(){
 
-	 port_out_forceSensors.write(forceSensors_msg);
+	digitalin = m_in_tueEthercat->digital_in;
+
+	digitalIns_msg.values[0] = digitalin.line.spare_di_1;
+	digitalIns_msg.values[1] = digitalin.line.spare_di_2;
+	digitalIns_msg.values[2] = digitalin.line.spare_di_3;
+	digitalIns_msg.values[3] = digitalin.line.spare_di_4;
+
+	port_out_digitalIns.write(digitalIns_msg);
 }
 
 void TUeES020::read_encoders(){
 
-    enc1 = m_in_armEthercat->encoder_angle_1;
-    enc2 = m_in_armEthercat->encoder_angle_2;
-    enc3 = m_in_armEthercat->encoder_angle_3;
+    encoder1_msg.value = m_in_tueEthercat->encoder_1;
+    encoder2_msg.value = m_in_tueEthercat->encoder_2;
+    encoder3_msg.value = m_in_tueEthercat->encoder_3;
 
-    encoderAngle1_msg.value = (enc1);
-    encoderAngle2_msg.value = (enc2);
-    encoderAngle3_msg.value = (enc3);   
+    port_out_encoder3.write(encoder3_msg);
+    port_out_encoder2.write(encoder2_msg);
+    port_out_encoder1.write(encoder1_msg);
 
-	port_out_encoderAngle3.write(encoderAngle3_msg); 
-	port_out_encoderAngle2.write(encoderAngle2_msg);
-	port_out_encoderAngle1.write(encoderAngle1_msg);
+    //log(Info) << "Angles: ["<< enc1 << ", "<< enc2 << ", " << enc3 << "]" << endlog();
+}
+
+void TUeES020::read_forces(){
+		
+    float force1 = (float) m_in_tueEthercat->force_1;
+    float force2 = (float) m_in_tueEthercat->force_2;
+    float force3 = (float) m_in_tueEthercat->force_3;
+	
+	 forceSensors_msg.values[0] = (force1/4095.0*3.3);   	 // 12 bits over 3.3V
+	 forceSensors_msg.values[1] = (force2/4095.0*3.3);   	 // 12 bits over 3.3V
+	 forceSensors_msg.values[2] = (force3/4095.0*3.3);   	 // 12 bits over 3.3V
+
+	 port_out_forceSensors.write(forceSensors_msg);
+
+	//log(Warning) << "Forces: ["<< force1 << ", "<< force2 << ", " << force3 << "]" << endlog();
 }
 
 void TUeES020::read_positions(){
-	float position1 = (float) m_in_armEthercat->position_1;
-	float position2 = (float) m_in_armEthercat->position_2;
-	float position3 = (float) m_in_armEthercat->position_3;
 
-	positionSensors_msg.values[0] = position1;
-	positionSensors_msg.values[1] = position2;
-	positionSensors_msg.values[2] = position3;
-	
-	port_out_positionSensors.write(positionSensors_msg);
+    positionSensors_msg.values[0] = (float) m_in_tueEthercat->position_1;
+    positionSensors_msg.values[1] = (float) m_in_tueEthercat->position_2;
+    positionSensors_msg.values[2] = (float) m_in_tueEthercat->position_3;
+
+    port_out_positionSensors.write(positionSensors_msg);
+
+    // log(Info) << "Positions: ["<< position1 << ", "<< position2 << ", " << position3 << "]" << endlog();
+}
+
+void TUeES020::read_time_stamp(){
+
+    timeStamp_msg.value = m_in_tueEthercat->time_stamp;
+    port_out_timeStamp.write(timeStamp_msg);
+    //log(Warning) << "Time Stamp: " << timeSt << endlog();
 }
 
 void TUeES020::write_pwm(float val1, float val2, float val3) {
@@ -237,44 +233,49 @@ void TUeES020::write_pwm(float val1, float val2, float val3) {
 	int16 tmp2 = (int16) val2;
 	int16 tmp3 = (int16) val3;
 
-	// limit the duty cycles
-	int16 maxPWM = 1000;
-	if (tmp1 > maxPWM)
-		tmp1 = maxPWM;
-	if (tmp1 < -maxPWM)
-		tmp1 = -maxPWM;
+    // saturate the pwm duty cycles
+    if (tmp1 > 1000)
+        tmp1 = 1000;
+    if (tmp1 < -1000)
+        tmp1 = -1000;
 
-	if (tmp2 > maxPWM)
-		tmp2 = maxPWM;
-	if (tmp2 < -maxPWM)
-		tmp2 = -maxPWM;
+    if (tmp2 > 1000)
+        tmp2 = 1000;
+    if (tmp2 < -1000)
+        tmp2 = -1000;
 
-	if (tmp3 > maxPWM)
-		tmp3 = maxPWM;
-	if (tmp3 < -maxPWM)
-		tmp3 = -maxPWM;
+    if (tmp3 > 1000)
+        tmp3 = 1000;
+    if (tmp3 < -1000)
+        tmp3 = -1000;
 		
-	m_out_armEthercat->pwm_duty_motor_1 = tmp1;
-	m_out_armEthercat->pwm_duty_motor_2 = tmp2;
-	m_out_armEthercat->pwm_duty_motor_3 = tmp3;
+    m_out_tueEthercat->pwm_duty_motor_1 = tmp1;
+    m_out_tueEthercat->pwm_duty_motor_2 = tmp2;
+    m_out_tueEthercat->pwm_duty_motor_3 = tmp3;
+    
+    //if (print_counter>1000) {
+	//	log(Warning) << "output pwms are " << tmp1 <<" and " << tmp2 << endlog();
+	//	print_counter = 0;
+	//}
+	//print_counter++;
 }
 
-void TUeES020::stop() {
+void TUeES020::stop() {    
 	
 	log(Warning) << "TUeES020: Stopped" << endlog();
 	
-    delete m_in_armEthercat;
-    delete m_out_armEthercat;
+    delete m_in_tueEthercat;
+    delete m_out_tueEthercat;
 
 	return;
 }
 
 namespace {
-soem_master::SoemDriver* createTUeES020(ec_slavet* mem_loc) {
-	return new TUeES020(mem_loc);
-}
+	soem_master::SoemDriver* createTUeES020(ec_slavet* mem_loc) {
+		return new TUeES020(mem_loc);
+	}
 
-const bool registered0 =
-		soem_master::SoemDriverFactory::Instance().registerDriver(
-				"TUeES020", createTUeES020);
+	const bool registered0 =
+			soem_master::SoemDriverFactory::Instance().registerDriver(
+					"TUeES020", createTUeES020);
 }

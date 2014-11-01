@@ -33,94 +33,129 @@
 #include "COE_config.h"
 #include <soem_beckhoff_drivers/AnalogMsg.h>
 #include <soem_beckhoff_drivers/EncoderMsg.h>
+#include <soem_beckhoff_drivers/DigitalMsg.h>
+
+#include <rtt/os/Timer.hpp>
 
 using namespace std;
 typedef vector<double> doubles;
 
+// WARNING, the bits are numbered in reversed order
+typedef union PACKED {
+    struct PACKED {
+        uint8 spare_di_1:1;		// bit 0
+        uint8 spare_di_2:1;
+        uint8 spare_di_3:1;
+        uint8 spare_di_4:1;
+        uint8 reserved_1:1;
+        uint8 reserved_2:1;
+        uint8 reserved_3:1;
+        uint8 power_status:1;  // bit 7
+    }       line;
+    uint8   port;
+} digital_in_t;
+
 typedef struct PACKED {
-		uint8 status_register; 			// General system status register
-		uint16 encoder_angle_1;  		// Actual position of motor encoder 1
-		uint16 encoder_angle_2;  		// Actual position of motor encoder 2
-		uint16 encoder_angle_3;  		// Actual position of motor encoder 3
+        digital_in_t digital_in;        // Digital inputs
+        uint16 encoder_1;               // Encoder 1
+        uint16 encoder_2;               // Encoder 2
+        uint16 encoder_3;               // Encoder 3
 		uint16 force_1; 				// Analog ADC value of force sensor input 1
-		uint16 position_1; 				// Analog ADC value of position sensor 1
-		uint16 force_2; 				// Analog ADC value of force sensor input 2
-		uint16 position_2; 				// Analog ADC value of position sensor 2
-		uint16 force_3; 				// Analog ADC value of force sensor input 3
-		uint16 position_3; 				// Analog ADC value of position sensor 3
-		uint8 message_index; 			// Message index counter
-	} in_armEthercatMemoryt;
+        uint16 force_2; 				// Analog ADC value of force sensor input 2
+        uint16 force_3; 				// Analog ADC value of force sensor input 3
+        uint16 position_1; 				// Analog ADC value of position sensor 1
+        uint16 position_2; 				// Analog ADC value of position sensor 2
+        uint16 position_3; 				// Analog ADC value of position sensor 3
+        uint16 spare_ai_1;              // Spare analog in 1
+        uint16 spare_ai_2;              // Spare analog in 2
+        uint16 time_stamp;              // Time stamp (1 bit equals 256 ns)
+    } in_tueEthercatMemoryt;
 
-	typedef struct PACKED {
-		int16 pwm_duty_motor_1; 		// PWM duty cycle for motor 1
-		int16 pwm_duty_motor_2; 		// PWM duty cycle for motor 2
-		int16 pwm_duty_motor_3; 		// PWM duty cycle for motor 3
-		uint8 control_register;			// Control register, used to disable heart beat and emergency button detection
-		uint8 heart_beat;				// Heart beat 
-		uint8 disable_motor_register;	// Register to enable/disable motors (Bit 0 = 1 disables all motors)
-	} out_armEthercatMemoryt;
+// WARNING, the bits are numbered in reversed order
+typedef union PACKED {
+    struct PACKED {	
+		uint8 enable_1:1;		// bit 0
+        uint8 enable_2:1;	
+        uint8 spare_do_3:1;
+        uint8 spare_do_4:1;	
+        uint8 reserved_1:1;
+        uint8 reserved_2:1;
+        uint8 reserved_3:1;
+        uint8 reserved_4:1;		// bit 7
+    }       line;
+    uint8   port;
+} digital_out_t;
 
-	using namespace RTT;
+typedef struct PACKED {
+    digital_out_t digital_out;      // Digital outputs
+    int16 pwm_duty_motor_1; 		// PWM duty cycle for motor 1 (limited from -1000 up to 1000, 0 is no motion)
+    int16 pwm_duty_motor_2; 		// PWM duty cycle for motor 2
+    int16 pwm_duty_motor_3; 		// PWM duty cycle for motor 3
+} out_tueEthercatMemoryt;
 
-	namespace soem_beckhoff_drivers {
+using namespace RTT;
 
-		class TUeES020: public soem_master::SoemDriver {
-		public:
-			TUeES020(ec_slavet* mem_loc);
-			~TUeES020() {};
+namespace soem_beckhoff_drivers {
 
-			bool configure();
-			bool start();
-			void update();
-			void stop();			
-			void write_pwm(float val1,float val2,float val3);
-			void read_encoders();
-			void read_forces();
-			void read_positions();
+    class TUeES020: public soem_master::SoemDriver {
+    public:
+        TUeES020(ec_slavet* mem_loc);
+        ~TUeES020() {};
 
+        void update();
+        bool configure();
+        bool start();
+		void read_digital_ins();
+        void read_encoders();
+        void read_forces();
+        void read_positions();
+        void read_analog_ins();
+        void read_time_stamp();
+        void write_pwm(float val1,float val2,float val3);
+        void stop();
 
-		private:
-			// Declaring of 
-			int printEnabled;
-			int printDisabled;
-			bool enablestatus;
-			bool setOutputToZero;
-			uint16 cntr;
-        
-			// declaring of local vectors and scalars
-			uint16 enc1;
-			uint16 enc2;
-			uint16 enc3;
-			uint8 heartbeat;
-			uint8 controlregister;
-			uint8 statusregister;
-			uint8 disable_motor_register;
-			std::vector<float> forceSensors;			
-			std::vector<float> positionSensors;					
-			std::vector<float> pwmDutyMotors;	
-			bool enable;
-			uint8 statusregister_prev;
-			int j;
-				
-			// Declaring of Messages		
-			EncoderMsg encoderAngle1_msg;
-			EncoderMsg encoderAngle2_msg;
-			EncoderMsg encoderAngle3_msg;
-			AnalogMsg  positionSensors_msg;
-			AnalogMsg  forceSensors_msg;
-			AnalogMsg  pwmDutyMotors_msg;
-			
-			in_armEthercatMemoryt* m_in_armEthercat;
-			out_armEthercatMemoryt* m_out_armEthercat;
+    private:
+        // Declaring of variables
+        int printEnabled;
+        int printDisabled;
+        uint16 cntr;
+        bool enablestatus;
+        bool enable;
+        bool port_enabled_was_connected;
+        digital_out_t digitalout;
+        digital_in_t digitalin;
+        digital_in_t digitalin_prev;
 
-			// Declaring of In and Out ports
-			OutputPort<EncoderMsg> port_out_encoderAngle1;
-			OutputPort<EncoderMsg> port_out_encoderAngle2;		
-			OutputPort<EncoderMsg> port_out_encoderAngle3;
-			OutputPort<AnalogMsg>  port_out_positionSensors;
-			OutputPort<AnalogMsg>  port_out_forceSensors;
-			InputPort<AnalogMsg>   port_in_pwmDutyMotors;
-			InputPort<bool>  	   port_in_enable;
-		};
-	}
+        // Declaring of Messages
+        DigitalMsg digitalIns_msg;
+        EncoderMsg encoder1_msg;
+        EncoderMsg encoder2_msg;
+        EncoderMsg encoder3_msg;
+        AnalogMsg  forceSensors_msg;
+        AnalogMsg  positionSensors_msg;
+        AnalogMsg  analogIns_msg;
+        EncoderMsg timeStamp_msg;
+        DigitalMsg digitalOuts_msg;
+        AnalogMsg  pwmDutyMotors_msg;
+
+        // Declaring of pointers to the ethercan memory
+        in_tueEthercatMemoryt* m_in_tueEthercat;
+        out_tueEthercatMemoryt* m_out_tueEthercat;
+
+        // Declaring of In and Out ports
+        OutputPort<DigitalMsg> port_out_digitalIns;
+        OutputPort<EncoderMsg> port_out_encoder1; // Make a new message type for
+        OutputPort<EncoderMsg> port_out_encoder2; // multiple encoder values.
+        OutputPort<EncoderMsg> port_out_encoder3;
+        OutputPort<AnalogMsg>  port_out_forceSensors;
+        OutputPort<AnalogMsg>  port_out_positionSensors;
+        OutputPort<AnalogMsg>  port_out_analogIns;
+        OutputPort<EncoderMsg> port_out_timeStamp;
+        InputPort<DigitalMsg>  port_in_digitalOuts;
+        InputPort<AnalogMsg>   port_in_pwmDutyMotors;
+        InputPort<bool>        port_in_enable;
+
+		uint16 print_counter;
+    };
+}
 #endif

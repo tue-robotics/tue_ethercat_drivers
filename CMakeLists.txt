@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(tue_ethercat_drivers)
 
 find_package(catkin REQUIRED 
-	soem_master
- )
+  soem_master
+)
 
 find_package(OROCOS-RTT REQUIRED ${RTT_HINTS} )
 include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
@@ -30,5 +30,11 @@ orocos_plugin(TUeEC010 src/soem_beckhoff_drivers.cpp src/TUeEC010_dummy.cpp ${HE
 target_link_libraries(TUeEC010 ${soem_LIBRARIES})
 orocos_plugin(EK1100 src/soem_beckhoff_drivers.cpp src/EK1100_dummy.cpp ${HEADER_FILES})
 target_link_libraries(EK1100 ${soem_LIBRARIES})
+
+# Wait for message generation
+#add_dependencies(TUeES020 soem_beckhoff_drivers_generate_messages_cpp)
+#add_dependencies(TUeES030 soem_beckhoff_drivers_generate_messages_cpp)
+#add_dependencies(TUeEC010 soem_beckhoff_drivers_generate_messages_cpp)
+#add_dependencies(EK1100   soem_beckhoff_drivers_generate_messages_cpp)
 
 orocos_generate_package() 

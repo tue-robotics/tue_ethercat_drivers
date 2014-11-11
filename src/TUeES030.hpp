@@ -131,6 +131,7 @@ namespace soem_beckhoff_drivers {
         uint16 cntr;
         bool enablestatus;
         bool enable;
+        bool port_enabled_was_connected;
         digital_out_t digitalout;
         digital_in_t digitalin;
         digital_in_t digitalin_prev;

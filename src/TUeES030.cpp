@@ -91,6 +91,7 @@ bool TUeES030::configure() {
     // initialize variables
     enablestatus = false;
 	enable = false;
+	port_enabled_was_connected = false;
 	
     cntr = 1;
     printEnabled = 0;
@@ -98,7 +99,6 @@ bool TUeES030::configure() {
 
     digitalin.port = 0;
     digitalin_prev.port = 0;
-    digitalin_prev.line.power_status = 1;
     digitalout.port = 0;
     
 	print_counter = 0;
@@ -119,7 +119,7 @@ bool TUeES030::start() {
 void TUeES030::update() {
 	
     // check if port_in_enable is connected and read the value
-    if (!port_in_enable.connected()) {
+    if (!port_in_enable.connected() && port_enabled_was_connected) {
         enable = false;
         if (enablestatus == false)	{
             log(Warning)<<"TUeES030 Driver: Waiting for Enable Signal, port_in_enable is not connected"<<endlog();
@@ -127,6 +127,7 @@ void TUeES030::update() {
         }
     }
     else if (port_in_enable.connected()) {
+		port_enabled_was_connected = true;
         port_in_enable.read(enable);
         if (enablestatus == true) {
             log(Warning)<<"TUeES030 Driver: Port_in_enable is connected"<<endlog();
@@ -245,9 +246,9 @@ void TUeES030::read_forces(){
     float force2 = (float) m_in_tueEthercat->force_2;
     float force3 = (float) m_in_tueEthercat->force_3;
 	
-	 forceSensors_msg.values[0] = (force1/2047.0*3.3);   	 //11 bits over 3,3V or 12 bits over 6,6V
-	 forceSensors_msg.values[1] = (force2/2047.0*3.3);   	 //11 bits over 3,3V or 12 bits over 6,6V
-	 forceSensors_msg.values[2] = (force3/2047.0*3.3);   	 //11 bits over 3,3V or 12 bits over 6,6V
+	 forceSensors_msg.values[0] = (force1/4095.0*6.6);   	 //12 bits over 6,6V
+	 forceSensors_msg.values[1] = (force2/4095.0*6.6);   	 //12 bits over 6,6V
+	 forceSensors_msg.values[2] = (force3/4095.0*6.6);   	 //12 bits over 6,6V
 
 	 port_out_forceSensors.write(forceSensors_msg);
 

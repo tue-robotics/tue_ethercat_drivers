@@ -105,7 +105,7 @@ bool TUeES020::start() {
 
 void TUeES020::update() {
 	
-    // check if port_in_enable is connected and read the value // port_enabled_was_connected boolean makes sure this warning is not printed at boot
+    // check if port_in_enable is connected and read the value
     if (!port_in_enable.connected() && port_enabled_was_connected) {
         enable = false;
         if (enablestatus == false)	{

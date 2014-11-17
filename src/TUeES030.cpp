@@ -246,9 +246,9 @@ void TUeES030::read_forces(){
     float force2 = (float) m_in_tueEthercat->force_2;
     float force3 = (float) m_in_tueEthercat->force_3;
 	
-	 forceSensors_msg.values[0] = (force1/4095.0*6.6);   	 //12 bits over 6,6V
-	 forceSensors_msg.values[1] = (force2/4095.0*6.6);   	 //12 bits over 6,6V
-	 forceSensors_msg.values[2] = (force3/4095.0*6.6);   	 //12 bits over 6,6V
+	 forceSensors_msg.values[0] = (force1/4095.0*3.3);   	 //12 bits over 3.3V
+	 forceSensors_msg.values[1] = (force2/4095.0*3.3);   	 //12 bits over 3.3V
+	 forceSensors_msg.values[2] = (force3/4095.0*3.3);   	 //12 bits over 3.3V
 
 	 port_out_forceSensors.write(forceSensors_msg);
 
@@ -257,9 +257,13 @@ void TUeES030::read_forces(){
 
 void TUeES030::read_positions(){
 
-    positionSensors_msg.values[0] = (float) m_in_tueEthercat->position_1;
-    positionSensors_msg.values[1] = (float) m_in_tueEthercat->position_2;
-    positionSensors_msg.values[2] = (float) m_in_tueEthercat->position_3;
+    float position1 = (float) m_in_tueEthercat->position_1;
+    float position2 = (float) m_in_tueEthercat->position_2;
+    float position3 = (float) m_in_tueEthercat->position_3;
+    
+    positionSensors_msg.values[0] = (position1/4095.0*3.3);   	 //12 bits over 3.3V
+    positionSensors_msg.values[1] = (position2/4095.0*3.3);   	 //12 bits over 3.3V
+    positionSensors_msg.values[2] = (position3/4095.0*3.3);   	 //12 bits over 3.3V
 
     port_out_positionSensors.write(positionSensors_msg);
 

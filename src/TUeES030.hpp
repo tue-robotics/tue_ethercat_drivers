@@ -63,8 +63,8 @@ typedef struct PACKED {
         uint16 current_1;               // Current 1
         uint16 current_2;               // Current 2
         uint16 current_3;               // Current 3
-        uint16 calipher_1;              // calipher 1 ??
-        uint16 calipher_2;              // calipher 2 ??
+        uint16 calipher_1;              // calipher 1 (1 bit = 0.01 mm)
+        uint16 calipher_2;              // calipher 2 (1 bit = 0.01 mm)
 		uint16 force_1; 				// Analog ADC value of force sensor input 1
         uint16 force_2; 				// Analog ADC value of force sensor input 2
         uint16 force_3; 				// Analog ADC value of force sensor input 3

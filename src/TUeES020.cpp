@@ -212,9 +212,9 @@ void TUeES020::read_forces(){
 
 void TUeES020::read_positions(){
 
-    positionSensors_msg.values[0] = (float) m_in_tueEthercat->position_1;
-    positionSensors_msg.values[1] = (float) m_in_tueEthercat->position_2;
-    positionSensors_msg.values[2] = (float) m_in_tueEthercat->position_3;
+    positionSensors_msg.values[0] = ((float) m_in_tueEthercat->position_1/((float)4095.0)*3.3);
+    positionSensors_msg.values[1] = ((float) m_in_tueEthercat->position_2/((float)4095.0)*3.3);
+    positionSensors_msg.values[2] = ((float) m_in_tueEthercat->position_3/((float)4095.0)*3.3);
 
     port_out_positionSensors.write(positionSensors_msg);
 

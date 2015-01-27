@@ -234,11 +234,13 @@ void TUeES030::read_currents(){
 
 void TUeES030::read_caliphers(){
 
-    caliphers_msg.values[0] = (float) m_in_tueEthercat->calipher_1;
-    caliphers_msg.values[1] = (float) m_in_tueEthercat->calipher_2;
+	float calipher1 = (float)m_in_tueEthercat->calipher_1;
+	float calipher2 = (float)m_in_tueEthercat->calipher_2;
+	
+	// conversion  1 bit = 0.01mm
+    caliphers_msg.values[0] = (calipher1*0.00001);
+    caliphers_msg.values[1] = (calipher2*0.00001);
     
-    // conversion  1 bit = 0.01mm
-
     port_out_caliphers.write(caliphers_msg);
 }
 

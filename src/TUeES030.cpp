@@ -234,8 +234,10 @@ void TUeES030::read_currents(){
 
 void TUeES030::read_caliphers(){
 
-	float calipher1 = (float)m_in_tueEthercat->calipher_1;
-	float calipher2 = (float)m_in_tueEthercat->calipher_2;
+	// Note, the caliphers are connected wrong
+	// calipher 2 is attached to the legs and calipher 1 to the trunk
+	float calipher2 = (float)m_in_tueEthercat->calipher_1;
+	float calipher1 = (float)m_in_tueEthercat->calipher_2;
 	
 	// conversion  1 bit = 0.01mm
     caliphers_msg.values[0] = (calipher1*0.00001);

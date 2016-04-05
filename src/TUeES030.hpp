@@ -43,7 +43,7 @@ typedef vector<double> doubles;
 // WARNING, the bits are numbered in reversed order
 typedef union PACKED {
     struct PACKED {
-        uint8 spare_di_1:1;		// bit 0
+        uint8 spare_di_1:1;     // bit 0
         uint8 spare_di_2:1;
         uint8 spare_di_3:1;
         uint8 spare_di_4:1;
@@ -55,6 +55,7 @@ typedef union PACKED {
     uint8   port;
 } digital_in_t;
 
+/*
 typedef struct PACKED {
         digital_in_t digital_in;        // Digital inputs
         uint16 encoder_1;               // Encoder 1
@@ -65,39 +66,88 @@ typedef struct PACKED {
         uint16 current_3;               // Current 3
         uint16 calipher_1;              // calipher 1 (1 bit = 0.01 mm)
         uint16 calipher_2;              // calipher 2 (1 bit = 0.01 mm)
-		uint16 force_1; 				// Analog ADC value of force sensor input 1
-        uint16 force_2; 				// Analog ADC value of force sensor input 2
-        uint16 force_3; 				// Analog ADC value of force sensor input 3
-        uint16 position_1; 				// Analog ADC value of position sensor 1
-        uint16 position_2; 				// Analog ADC value of position sensor 2
-        uint16 position_3; 				// Analog ADC value of position sensor 3
+        uint16 force_1;                 // Analog ADC value of force sensor input 1
+        uint16 force_2;                 // Analog ADC value of force sensor input 2
+        uint16 force_3;                 // Analog ADC value of force sensor input 3
+        uint16 position_1;              // Analog ADC value of position sensor 1
+        uint16 position_2;              // Analog ADC value of position sensor 2
+        uint16 position_3;              // Analog ADC value of position sensor 3
         uint16 spare_ai_1;              // Spare analog in 1
         uint16 spare_ai_2;              // Spare analog in 2
         uint16 time_stamp;              // Time stamp (1 bit equals 256 ns)
-    } in_tueEthercatMemoryt;
+    } in_tueEthercatMemoryt; */
+    
+typedef struct PACKED
+{ 
+    uint8       mstate1;
+    uint32      count1;
+    uint32      timestamp1;
+    int16       velocity1;
+    int16       current1;
+    uint8       mstate2;
+    uint32      count2;
+    uint32      timestamp2;
+    int16       velocity2;
+    int16       current2;
+    uint8       mstate3;
+    uint32      count3;
+    uint32      timestamp3;
+    int16       velocity3;
+    int16       current3;
+    uint8       digital;
+    uint16      caliper1;
+    uint16      caliper2;
+    uint16      force1;
+    uint16      force2;
+    uint16      force3;
+    uint16      pos1;
+    uint16      pos2;
+    uint16      pos3;
+    uint16      analog1;
+    uint16      analog2;
+    uint16      linevoltage;
+    uint16      ectime;         
+} in_tueEthercatMemoryt;    
 
 // WARNING, the bits are numbered in reversed order
 typedef union PACKED {
-    struct PACKED {	
-		uint8 enable_1:1;		// bit 0
-        uint8 enable_2:1;	
+    struct PACKED { 
+        uint8 enable_1:1;       // bit 0
+        uint8 enable_2:1;   
         uint8 spare_do_3:1;
-        uint8 spare_do_4:1;	
+        uint8 spare_do_4:1; 
         uint8 reserved_1:1;
         uint8 reserved_2:1;
         uint8 reserved_3:1;
-        uint8 reserved_4:1;		// bit 7
+        uint8 reserved_4:1;     // bit 7
     }       line;
     uint8   port;
 } digital_out_t;
 
+/*
 typedef struct PACKED {
     digital_out_t digital_out;      // Digital outputs
-    int16 pwm_duty_motor_1; 		// PWM duty cycle for motor 1 (limited from -1000 up to 1000, 0 is no motion)
-    int16 pwm_duty_motor_2; 		// PWM duty cycle for motor 2
-    int16 pwm_duty_motor_3; 		// PWM duty cycle for motor 3
+    int16 pwm_duty_motor_1;         // PWM duty cycle for motor 1 (limited from -1000 up to 1000, 0 is no motion)
+    int16 pwm_duty_motor_2;         // PWM duty cycle for motor 2
+    int16 pwm_duty_motor_3;         // PWM duty cycle for motor 3
     int16 analog_out_1;             // Analog output 1  (0V = -2048, 10V = 2047, 5V = 0 is no motion)
     int16 analog_out_2;             // Analog output 2
+} out_tueEthercatMemoryt;*/
+
+typedef struct PACKED
+{
+    uint8       mcom1;
+    int16       setpoint1;
+    int16       ff1;
+    uint8       mcom2;
+    int16       setpoint2;
+    int16       ff2;
+    uint8       mcom3;
+    int16       setpoint3;
+    int16       ff3;
+    uint8       digital;
+    int16       aout1;
+    int16       aout2;
 } out_tueEthercatMemoryt;
 
 using namespace RTT;
@@ -112,7 +162,7 @@ namespace soem_beckhoff_drivers {
         void update();
         bool configure();
         bool start();
-		void read_digital_ins();
+        void read_digital_ins();
         void read_encoders();
         void read_currents();
         void read_caliphers();
@@ -171,7 +221,7 @@ namespace soem_beckhoff_drivers {
         InputPort<AnalogMsg>   port_in_analogOuts;
         InputPort<bool>        port_in_enable;
 
-		uint16 print_counter;
+        uint16 print_counter;
     };
 }
 #endif

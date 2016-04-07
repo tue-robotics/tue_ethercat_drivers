@@ -80,33 +80,34 @@ typedef struct PACKED {
 typedef struct PACKED
 { 
     uint8       mstate1;
-    uint32      count1;
+    uint32      encoder_1;
     uint32      timestamp1;
     int16       velocity1;
-    int16       current1;
+    int16       current_1;
     uint8       mstate2;
-    uint32      count2;
+    uint32      encoder_2;
     uint32      timestamp2;
     int16       velocity2;
-    int16       current2;
+    int16       current_2;
     uint8       mstate3;
-    uint32      count3;
+    uint32      encoder_3;
     uint32      timestamp3;
     int16       velocity3;
-    int16       current3;
-    uint8       digital;
-    uint16      caliper1;
-    uint16      caliper2;
-    uint16      force1;
-    uint16      force2;
-    uint16      force3;
-    uint16      pos1;
-    uint16      pos2;
-    uint16      pos3;
-    uint16      analog1;
-    uint16      analog2;
+    int16       current_3;
+//    uint8       digital;
+    digital_in_t digital_in;
+    uint16      calipher_1;
+    uint16      calipher_2;
+    uint16      force_1;
+    uint16      force_2;
+    uint16      force_3;
+    uint16      position_1;
+    uint16      position_2;
+    uint16      position_3;
+    uint16      spare_ai_1;
+    uint16      spare_ai_2;
     uint16      linevoltage;
-    uint16      ectime;         
+    uint16      time_stamp;
 } in_tueEthercatMemoryt;    
 
 // WARNING, the bits are numbered in reversed order
@@ -137,17 +138,18 @@ typedef struct PACKED {
 typedef struct PACKED
 {
     uint8       mcom1;
-    int16       setpoint1;
+    int16       pwm_duty_motor_1;   //setpoint1
     int16       ff1;
     uint8       mcom2;
-    int16       setpoint2;
+    int16       pwm_duty_motor_2;   //setpoint2
     int16       ff2;
     uint8       mcom3;
-    int16       setpoint3;
+    int16       pwm_duty_motor_3;   //setpoint3
     int16       ff3;
-    uint8       digital;
-    int16       aout1;
-    int16       aout2;
+//    uint8       digital;
+    digital_out_t digital_out;
+    int16       analog_out_1;
+    int16       analog_out_2;
 } out_tueEthercatMemoryt;
 
 using namespace RTT;

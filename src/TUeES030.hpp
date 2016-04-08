@@ -85,17 +85,17 @@ typedef struct PACKED
     uint32      encoder_1;			// Encoder 1
     uint32      timestamp1;			// Time stamp encoder 1
     int16       velocity1;			// Velocity encoder 1; 1 bit=0.1 rad/s; depending on parameters on slave
-    int16       current_1;			// current on PWM 1
+    int16       current_1;			// current on PWM 1 (1 bit = 1 mA)
     uint8       mstate2;			// motor state 2
     uint32      encoder_2;			// Encoder 2
     uint32      timestamp2;			// Time stamp encoder 2
     int16       velocity2;			// Velocity encoder 2; 1 bit=0.1 rad/s; depending on parameters on slave
-    int16       current_2;			// current on PWM 2
+    int16       current_2;			// current on PWM 2 (1 bit = 1 mA)
     uint8       mstate3;            // motor state 3
     uint32      encoder_3;			// Encoder 3
     uint32      timestamp3;			// Time stamp encoder 3
     int16       velocity3;			// Velocity encoder 3; 1 bit=0.1 rad/s; depending on parameters on slave
-    int16       current_3;			// current on PWM 2
+    int16       current_3;			// current on PWM 2 (1 bit = 1 mA)
     digital_in_t digital_in;        // digital input 8 bits
     uint16      calipher_1;			// calipher 1 (1 bit = 0.01 mm)
     uint16      calipher_2;			// calipher 2 (1 bit = 0.01 mm)
@@ -107,7 +107,7 @@ typedef struct PACKED
     uint16      position_3;			// Analog ADC value of position sensor 3
     uint16      spare_ai_1;			// Spare analog in 1
     uint16      spare_ai_2;			// Spare analog in 2
-    uint16      linevoltage;
+    uint16      linevoltage;  // 2500 bits = 25V; 1 bit = 0,01V
     uint16      time_stamp;
 } in_tueEthercatMemoryt;    
 
@@ -139,17 +139,17 @@ typedef struct PACKED {
 typedef struct PACKED
 {
     uint8       mcom1;              // motor 1 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active)
-    int16       pwm_duty_motor_1;   // current setpoint 1 (1 bit = 0.1 mA) 6A continiuous current
-    int16       ff1;                // current feed forward 1
+    int16       pwm_duty_motor_1;   // current setpoint 1 (1 bit = 1 mA) 6A continiuous current
+    int16       ff1;                // current feed forward 1 (1 bit = 1 mA)
     uint8       mcom2;              // motor 2 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active)
-    int16       pwm_duty_motor_2;   // current setpoint 2 (1 bit = 0.1 mA) 3A continuous current
-    int16       ff2;                // current feed forward 2
+    int16       pwm_duty_motor_2;   // current setpoint 2 (1 bit = 1 mA) 3A continuous current
+    int16       ff2;                // current feed forward 2 (1 bit = 1 mA)
     uint8       mcom3;              // motor 3 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active)
-    int16       pwm_duty_motor_3;   // current setpoint 3 (1 bit = 0.1 mA) 3A continuous current
-    int16       ff3;                // current feed forward 3
+    int16       pwm_duty_motor_3;   // current setpoint 3 (1 bit = 1 mA) 3A continuous current
+    int16       ff3;                // current feed forward 3 (1 bit = 1 mA)
     digital_out_t digital_out;      // digital output 8 bits
     int16       analog_out_1;       // analog output 1  (0V = -2048, 10V = 2047, 5V = 0 is no motion)
-    int16       analog_out_2;       // analog output 2
+    int16       analog_out_2;       // analog output 2  (0V = -2048, 10V = 2047, 5V = 0 is no motion)
 } out_tueEthercatMemoryt;
 
 using namespace RTT;

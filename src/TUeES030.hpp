@@ -1,5 +1,7 @@
 /***************************************************************************
- tag: Ton Peters, Max Baeten, Ruud van den Bogaert
+ tag:
+ V2: Matthijs van der Burgh
+ V1: Ton Peters, Max Baeten, Ruud van den Bogaert
  Driver for TUeES030
 
  ***************************************************************************
@@ -79,33 +81,32 @@ typedef struct PACKED {
     
 typedef struct PACKED
 { 
-    uint8       mstate1;
-    uint32      encoder_1;
-    uint32      timestamp1;
-    int16       velocity1;
-    int16       current_1;
-    uint8       mstate2;
-    uint32      encoder_2;
-    uint32      timestamp2;
-    int16       velocity2;
-    int16       current_2;
-    uint8       mstate3;
-    uint32      encoder_3;
-    uint32      timestamp3;
-    int16       velocity3;
-    int16       current_3;
-//    uint8       digital;
-    digital_in_t digital_in;
-    uint16      calipher_1;
-    uint16      calipher_2;
-    uint16      force_1;
-    uint16      force_2;
-    uint16      force_3;
-    uint16      position_1;
-    uint16      position_2;
-    uint16      position_3;
-    uint16      spare_ai_1;
-    uint16      spare_ai_2;
+    uint8       mstate1;			// motor state 1
+    uint32      encoder_1;			// Encoder 1
+    uint32      timestamp1;			// Time stamp encoder 1
+    int16       velocity1;			// Velocity encoder 1; 1 bit=0.1 rad/s; depending on parameters on slave
+    int16       current_1;			// current on PWM 1
+    uint8       mstate2;			// motor state 2
+    uint32      encoder_2;			// Encoder 2
+    uint32      timestamp2;			// Time stamp encoder 2
+    int16       velocity2;			// Velocity encoder 2; 1 bit=0.1 rad/s; depending on parameters on slave
+    int16       current_2;			// current on PWM 2
+    uint8       mstate3;            // motor state 3
+    uint32      encoder_3;			// Encoder 3
+    uint32      timestamp3;			// Time stamp encoder 3
+    int16       velocity3;			// Velocity encoder 3; 1 bit=0.1 rad/s; depending on parameters on slave
+    int16       current_3;			// current on PWM 2
+    digital_in_t digital_in;        // digital input 8 bits
+    uint16      calipher_1;			// calipher 1 (1 bit = 0.01 mm)
+    uint16      calipher_2;			// calipher 2 (1 bit = 0.01 mm)
+    uint16      force_1;			// Analog ADC value of force sensor input 1
+    uint16      force_2;			// Analog ADC value of force sensor input 2
+    uint16      force_3;			// Analog ADC value of force sensor input 3
+    uint16      position_1;			// Analog ADC value of position sensor 1
+    uint16      position_2;			// Analog ADC value of position sensor 2
+    uint16      position_3;			// Analog ADC value of position sensor 3
+    uint16      spare_ai_1;			// Spare analog in 1
+    uint16      spare_ai_2;			// Spare analog in 2
     uint16      linevoltage;
     uint16      time_stamp;
 } in_tueEthercatMemoryt;    
@@ -137,19 +138,18 @@ typedef struct PACKED {
 
 typedef struct PACKED
 {
-    uint8       mcom1;
-    int16       pwm_duty_motor_1;   //setpoint1
-    int16       ff1;
-    uint8       mcom2;
-    int16       pwm_duty_motor_2;   //setpoint2
-    int16       ff2;
-    uint8       mcom3;
-    int16       pwm_duty_motor_3;   //setpoint3
-    int16       ff3;
-//    uint8       digital;
-    digital_out_t digital_out;
-    int16       analog_out_1;
-    int16       analog_out_2;
+    uint8       mcom1;              // motor 1 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active)
+    int16       pwm_duty_motor_1;   // current setpoint 1 (1 bit = 0.1 mA) 6A continiuous current
+    int16       ff1;                // current feed forward 1
+    uint8       mcom2;              // motor 2 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active)
+    int16       pwm_duty_motor_2;   // current setpoint 2 (1 bit = 0.1 mA) 3A continuous current
+    int16       ff2;                // current feed forward 2
+    uint8       mcom3;              // motor 3 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active)
+    int16       pwm_duty_motor_3;   // current setpoint 3 (1 bit = 0.1 mA) 3A continuous current
+    int16       ff3;                // current feed forward 3
+    digital_out_t digital_out;      // digital output 8 bits
+    int16       analog_out_1;       // analog output 1  (0V = -2048, 10V = 2047, 5V = 0 is no motion)
+    int16       analog_out_2;       // analog output 2
 } out_tueEthercatMemoryt;
 
 using namespace RTT;
@@ -166,6 +166,8 @@ namespace soem_beckhoff_drivers {
         bool start();
         void read_digital_ins();
         void read_encoders();
+        void read_encoder_times();  //
+        void read_encoder_vels();   //
         void read_currents();
         void read_caliphers();
         void read_forces();
@@ -193,6 +195,10 @@ namespace soem_beckhoff_drivers {
         EncoderMsg encoder1_msg;
         EncoderMsg encoder2_msg;
         EncoderMsg encoder3_msg;
+        EncoderMsg enc_time1_msg;
+        EncoderMsg enc_time2_msg;
+        EncoderMsg enc_time3_msg;
+        AnalogMsg  enc_vels_msg;
         AnalogMsg  currents_msg;
         AnalogMsg  caliphers_msg;
         AnalogMsg  forceSensors_msg;
@@ -209,9 +215,13 @@ namespace soem_beckhoff_drivers {
 
         // Declaring of In and Out ports
         OutputPort<DigitalMsg> port_out_digitalIns;
-        OutputPort<EncoderMsg> port_out_encoder1; // Make a new message type for
-        OutputPort<EncoderMsg> port_out_encoder2; // multiple encoder values.
+        OutputPort<EncoderMsg> port_out_encoder1;   // Make a new message type for
+        OutputPort<EncoderMsg> port_out_encoder2;   // multiple encoder values.
         OutputPort<EncoderMsg> port_out_encoder3;
+        OutputPort<EncoderMsg> port_out_enc_time1;
+        OutputPort<EncoderMsg> port_out_enc_time2;
+        OutputPort<EncoderMsg> port_out_enc_time3;
+        OutputPort<AnalogMsg>  port_out_enc_vels;
         OutputPort<AnalogMsg>  port_out_currents;
         OutputPort<AnalogMsg>  port_out_caliphers;
         OutputPort<AnalogMsg>  port_out_forceSensors;
@@ -224,6 +234,7 @@ namespace soem_beckhoff_drivers {
         InputPort<bool>        port_in_enable;
 
         uint16 print_counter;
+        float analogconverter;  // converter from 3.3V to 12bits
     };
 }
 #endif

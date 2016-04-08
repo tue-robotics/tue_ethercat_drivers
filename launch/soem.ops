@@ -9,7 +9,7 @@
 
 #### IMPORT PACKAGE ####
 import("rtt_ros")
-ros.import("amigo_hardware")
+ros.import("sergio_hardware")
 #ros.import("tue_ethercat_drivers")
 
 #### DECLARATION OF PARAMETERS ####

@@ -83,17 +83,17 @@ typedef struct PACKED
 { 
     uint8       mstate1;			// motor state 1
     uint32      encoder_1;			// Encoder 1
-    uint32      timestamp1;			// Time stamp encoder 1
+    uint32      timestamp1;			// Time stamp encoder 1 (Only changes, if encoder changes)
     int16       velocity1;			// Velocity encoder 1; 1 bit=0.1 rad/s; depending on parameters on slave
     int16       current_1;			// current on PWM 1 (1 bit = 1 mA)
     uint8       mstate2;			// motor state 2
     uint32      encoder_2;			// Encoder 2
-    uint32      timestamp2;			// Time stamp encoder 2
+    uint32      timestamp2;			// Time stamp encoder 2 (Only changes, if encoder changes)
     int16       velocity2;			// Velocity encoder 2; 1 bit=0.1 rad/s; depending on parameters on slave
     int16       current_2;			// current on PWM 2 (1 bit = 1 mA)
     uint8       mstate3;            // motor state 3
     uint32      encoder_3;			// Encoder 3
-    uint32      timestamp3;			// Time stamp encoder 3
+    uint32      timestamp3;			// Time stamp encoder 3 (Only changes, if encoder changes)
     int16       velocity3;			// Velocity encoder 3; 1 bit=0.1 rad/s; depending on parameters on slave
     int16       current_3;			// current on PWM 2 (1 bit = 1 mA)
     digital_in_t digital_in;        // digital input 8 bits

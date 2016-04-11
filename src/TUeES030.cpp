@@ -41,6 +41,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
             port_out_forceSensors("forceSensors"),
             port_out_positionSensors("positionSensors"),
             port_out_analogIns("analogIns"),
+            port_out_linevoltage("linevoltage"),
             port_out_timeStamp("timeStamp"),
             port_in_digitalOuts("digitalOuts"),
             port_in_pwmDutyMotors("pwmDutyMotors"),
@@ -61,6 +62,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     m_service->addOperation("read_caliphers", &TUeES030::read_caliphers, this, RTT::OwnThread).doc("Read calipher values");
     m_service->addOperation("read_forces", &TUeES030::read_forces, this, RTT::OwnThread).doc("Read force sensor values");
     m_service->addOperation("read_positions", &TUeES030::read_positions, this, RTT::OwnThread).doc("Read position sensor values");
+    m_service->addOperation("read_linevoltage", &TUeES030::read_linevoltage, this, RTT::OwnThread).doc("Read linevoltage");
     m_service->addOperation("read_time_stamp", &TUeES030::read_time_stamp, this, RTT::OwnThread).doc("Read time stamp");
 
 	m_service->addPort(port_out_digitalIns).doc("");
@@ -76,6 +78,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     m_service->addPort(port_out_forceSensors).doc("");
 	m_service->addPort(port_out_positionSensors).doc("");
     m_service->addPort(port_out_analogIns).doc("");
+    m_service->addPort(port_out_linevoltage).doc("");
     m_service->addPort(port_out_timeStamp).doc("");
     m_service->addPort(port_in_digitalOuts).doc("");
     m_service->addPort(port_in_pwmDutyMotors).doc("");
@@ -89,16 +92,17 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     enc_time1_msg.value=0;
     enc_time2_msg.value=0;
     enc_time3_msg.value=0;
-    enc_vels_msg.values.assign(3,0.0);
-    currents_msg.values.assign(3,0.0);
-    caliphers_msg.values.assign(2,0.0);
+    enc_vels_msg.values.assign(3, 0.0);
+    currents_msg.values.assign(3, 0.0);
+    caliphers_msg.values.assign(2, 0.0);
     forceSensors_msg.values.assign(3, 0.0);
     positionSensors_msg.values.assign(3, 0.0);
-    analogIns_msg.values.assign(2,0.0);
+    analogIns_msg.values.assign(2, 0.0);
+    linevoltage_msg.value=0;
     timeStamp_msg.value = 0;
-    digitalOuts_msg.values.assign(2,0.0);
-    analogOuts_msg.values.assign(2,0.0);
-    pwmDutyMotors_msg.values.assign(3,0.0);
+    digitalOuts_msg.values.assign(2, 0.0);
+    analogOuts_msg.values.assign(2, 0.0);
+    pwmDutyMotors_msg.values.assign(3, 0.0);
 
     analogconverter=4095.0*3.3;
 }
@@ -161,8 +165,9 @@ void TUeES030::update() {
 	// read the data from the ethercat memory input and send to orocos
 	read_digital_ins();
     read_encoders();
-    read_encoder_times();   //
-    read_encoder_vels();    //
+    read_encoder_times();
+    read_encoder_vels();
+    read_linevoltage();
 	read_time_stamp();
     read_currents();
     read_caliphers();
@@ -197,7 +202,7 @@ void TUeES030::update() {
 	else {
 		digitalout.port = 0;
 		write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
-		write_analog_out((float)(0.0),(float)(0.0));
+        write_analog_out((float)(0.0),(float)(0.0));
 	}
     // set digital outputs to ethercat memory output
     m_out_tueEthercat->digital_out = digitalout;
@@ -323,6 +328,12 @@ void TUeES030::read_positions(){
     port_out_positionSensors.write(positionSensors_msg);
 
     // log(Info) << "Positions: ["<< position1 << ", "<< position2 << ", " << position3 << "]" << endlog();
+}
+
+void TUeES030::read_linevoltage(){
+
+    linevoltage_msg.value = m_in_tueEthercat->linevoltage;
+    port_out_linevoltage.write(linevoltage_msg);
 }
 
 void TUeES030::read_time_stamp(){

@@ -107,7 +107,7 @@ typedef struct PACKED
     uint16      position_3;			// Analog ADC value of position sensor 3
     uint16      spare_ai_1;			// Spare analog in 1
     uint16      spare_ai_2;			// Spare analog in 2
-    uint16      linevoltage;  // 2500 bits = 25V; 1 bit = 0,01V
+    uint16      linevoltage;        // 2500 bits = 25V; 1 bit = 0,01V
     uint16      time_stamp;
 } in_tueEthercatMemoryt;    
 
@@ -166,13 +166,14 @@ namespace soem_beckhoff_drivers {
         bool start();
         void read_digital_ins();
         void read_encoders();
-        void read_encoder_times();  //
-        void read_encoder_vels();   //
+        void read_encoder_times();
+        void read_encoder_vels();
         void read_currents();
         void read_caliphers();
         void read_forces();
         void read_positions();
         void read_analog_ins();
+        void read_linevoltage();
         void read_time_stamp();
         void write_pwm(float val1,float val2,float val3);
         void write_analog_out(float val1, float val2);
@@ -204,6 +205,7 @@ namespace soem_beckhoff_drivers {
         AnalogMsg  forceSensors_msg;
         AnalogMsg  positionSensors_msg;
         AnalogMsg  analogIns_msg;
+        EncoderMsg linevoltage_msg;
         EncoderMsg timeStamp_msg;
         DigitalMsg digitalOuts_msg;
         AnalogMsg  pwmDutyMotors_msg;
@@ -227,6 +229,7 @@ namespace soem_beckhoff_drivers {
         OutputPort<AnalogMsg>  port_out_forceSensors;
         OutputPort<AnalogMsg>  port_out_positionSensors;
         OutputPort<AnalogMsg>  port_out_analogIns;
+        OutputPort<EncoderMsg> port_out_linevoltage;
         OutputPort<EncoderMsg> port_out_timeStamp;
         InputPort<DigitalMsg>  port_in_digitalOuts;
         InputPort<AnalogMsg>   port_in_pwmDutyMotors;

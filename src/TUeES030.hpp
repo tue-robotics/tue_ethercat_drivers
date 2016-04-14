@@ -138,13 +138,13 @@ typedef struct PACKED {
 
 typedef struct PACKED
 {
-    uint8       mcom1;              // motor 1 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active) (00=braked, 01=tristate, 10/11=controlled)
+    uint8       mcom1;              // motor 1 command (0=braked, 1/3=controlled, 2=tristate)
     int16       pwm_duty_motor_1;   // current setpoint 1 (1 bit = 1 mA) 6A continiuous current
     int16       ff1;                // current feed forward 1 (1 bit = 1 mA)
-    uint8       mcom2;              // motor 2 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active) (00=braked, 01=tristate, 10/11=controlled)
+    uint8       mcom2;              // motor 2 command (0=braked, 1/3=controlled, 2=tristate)
     int16       pwm_duty_motor_2;   // current setpoint 2 (1 bit = 1 mA) 3A continuous current
     int16       ff2;                // current feed forward 2 (1 bit = 1 mA)
-    uint8       mcom3;              // motor 3 command (bit 0..1 = motor channel , bit 2 = enable , bit 3 = tristate active) (00=braked, 01=tristate, 10/11=controlled)
+    uint8       mcom3;              // motor 3 command (0=braked, 1/3=controlled, 2=tristate)
     int16       pwm_duty_motor_3;   // current setpoint 3 (1 bit = 1 mA) 3A continuous current
     int16       ff3;                // current feed forward 3 (1 bit = 1 mA)
     digital_out_t digital_out;      // digital output 8 bits

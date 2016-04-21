@@ -91,12 +91,12 @@ typedef struct PACKED
     uint32      timestamp2;			// Time stamp encoder 2 (Only changes, if encoder changes)
     int16       velocity2;			// Velocity encoder 2; 1 bit=0.1 rad/s; depending on parameters on slave
     int16       current_2;			// current on PWM 2 (1 bit = 1 mA)
-    uint8       mstate3;            // motor state 3
+    uint8       mstate3;                        // motor state 3
     uint32      encoder_3;			// Encoder 3
     uint32      timestamp3;			// Time stamp encoder 3 (Only changes, if encoder changes)
     int16       velocity3;			// Velocity encoder 3; 1 bit=0.1 rad/s; depending on parameters on slave
     int16       current_3;			// current on PWM 2 (1 bit = 1 mA)
-    digital_in_t digital_in;        // digital input 8 bits
+    digital_in_t digital_in;                    // digital input 8 bits
     uint16      calipher_1;			// calipher 1 (1 bit = 0.01 mm)
     uint16      calipher_2;			// calipher 2 (1 bit = 0.01 mm)
     uint16      force_1;			// Analog ADC value of force sensor input 1
@@ -176,6 +176,8 @@ namespace soem_beckhoff_drivers {
         void read_linevoltage();
         void read_time_stamp();
         void write_pwm(float val1,float val2,float val3);
+        void write_ffmotors(float val1, float val2, float val3);
+        void write_mcommands(uint8 val1, uint8 val2, uint val3);
         void write_analog_out(float val1, float val2);
         void stop();
 
@@ -208,7 +210,11 @@ namespace soem_beckhoff_drivers {
         EncoderMsg linevoltage_msg;
         EncoderMsg timeStamp_msg;
         DigitalMsg digitalOuts_msg;
+        EncoderMsg mcom1_msg;
+        EncoderMsg mcom2_msg;
+        EncoderMsg mcom3_msg;
         AnalogMsg  pwmDutyMotors_msg;
+        AnalogMsg  ffmotors_msg;
         AnalogMsg  analogOuts_msg;
 
         // Declaring of pointers to the ethercan memory
@@ -234,6 +240,10 @@ namespace soem_beckhoff_drivers {
         InputPort<DigitalMsg>  port_in_digitalOuts;
         InputPort<AnalogMsg>   port_in_pwmDutyMotors;
         InputPort<AnalogMsg>   port_in_analogOuts;
+        InputPort<EncoderMsg>  port_in_mcom1;
+        InputPort<EncoderMsg>  port_in_mcom2;
+        InputPort<EncoderMsg>  port_in_mcom3;
+        InputPort<AnalogMsg>   port_in_ffmotors;
         InputPort<bool>        port_in_enable;
 
         uint16 print_counter;

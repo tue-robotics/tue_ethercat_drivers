@@ -177,7 +177,7 @@ namespace soem_beckhoff_drivers {
         void read_time_stamp();
         void write_pwm(float val1,float val2,float val3);
         void write_ffmotors(float val1, float val2, float val3);
-        void write_mcommands(uint8 val1, uint8 val2, uint val3);
+        void write_mcommands(uint8 val1, uint8 val2, uint8 val3);
         void write_analog_out(float val1, float val2);
         void stop();
 

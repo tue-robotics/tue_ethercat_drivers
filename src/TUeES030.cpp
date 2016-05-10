@@ -109,9 +109,9 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     digitalOuts_msg.values.assign(2, 0.0);
     analogOuts_msg.values.assign(2, 0.0);
     pwmDutyMotors_msg.values.assign(3, 0.0);
-    mcom1_msg=0; // braked
-    mcom2_msg=0; // braked
-    mcom3_msg=0; // braked
+    mcom1_msg.value=0; // braked
+    mcom2_msg.value=0; // braked
+    mcom3_msg.value=0; // braked
     ffmotors_msg.values.assign(3, 0.0);
 
     analogconverter=4095.0*3.3;

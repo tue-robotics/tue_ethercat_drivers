@@ -114,7 +114,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     mcom3_msg.value=0; // braked
     ffmotors_msg.values.assign(3, 0.0);
 
-    analogconverter=4095.0*3.3;
+    analogconverter=4095.0/3.3;
 }
 
 

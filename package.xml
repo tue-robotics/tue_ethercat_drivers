@@ -12,10 +12,10 @@
 
   <build_depend>ocl</build_depend>
   <build_depend>soem_master</build_depend>
-  <!-- <build_depend>soem_beckhoff_drivers</build_depend> -->
+  <build_depend>roscpp</build_depend>
 
   <run_depend>ocl</run_depend>  
   <run_depend>soem_master</run_depend>
-  <!-- <run_depend>soem_beckhoff_drivers</run_depend> -->
+  <run_depend>roscpp</run_depend>
 
 </package>

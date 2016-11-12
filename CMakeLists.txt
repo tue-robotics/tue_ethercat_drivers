@@ -3,6 +3,7 @@ project(tue_ethercat_drivers)
 
 find_package(catkin REQUIRED 
   soem_master
+  roscpp
 )
 
 find_package(OROCOS-RTT REQUIRED ${RTT_HINTS} )

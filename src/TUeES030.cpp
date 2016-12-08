@@ -285,6 +285,10 @@ void TUeES030::update() {
             enablestatus = false;
         }
     }
+
+    // EL6022
+    executeStateActions();
+    updateState();
 	
     // read the data from the ethercat memory input and send to orocos
     read_digital_ins();

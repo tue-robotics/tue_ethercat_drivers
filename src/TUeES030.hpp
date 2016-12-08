@@ -39,7 +39,95 @@
 
 #include <rtt/os/Timer.hpp>
 
+// EL6022
+#include <soem_beckhoff_drivers/CommMsgBig.h>
+#include <queue>
+
+// EL6022
+//using namespace RTT;
+
 using namespace std;
+
+// EL6022
+#define CHANNEL_1               0
+//#define CHANNEL_2               1
+#define CHANNEL_NUM             1
+#define MAX_TRIALS              30
+#define MAX_OUT_QUEUE_SIZE      220
+#define RS485_MAX_DATA_LENGTH   22
+
+//CONTROL MASKS
+#define TRANSMIT_REQUEST        0x01
+#define RECEIVE_ACCEPTED        0x02
+#define INIT_REQUEST            0x04
+#define SEND_CONTINUOUS         0x08
+
+//STATUS MASKS
+#define TRANSMIT_ACCEPTED       0x01
+#define RECEIVE_REQUEST         0x02
+#define INIT_ACCEPTED           0x04
+#define BUFFER_FULL             0x08
+#define PARITY_ERROR            0x10
+#define FRAMING_ERROR           0x20
+#define OVERRUN_ERROR           0x40
+
+typedef enum RS485_BAUDRATE {
+	RS485_300_BAUD		= 1,
+ 	RS485_600_BAUD,
+  	RS485_1200_BAUD,
+	RS485_2400_BAUD,
+	RS485_4800_BAUD,
+	RS485_9600_BAUD,
+	RS485_19200_BAUD,
+	RS485_38400_BAUD,
+	RS485_57600_BAUD,
+	RS485_115200_BAUD
+} RS485_BAUDRATE;
+
+typedef enum RS485_DATA_FRAME {
+	RS485_7B_EP_1S		= 1,
+	RS485_7B_OP_1S,
+	RS485_8B_NP_1S,
+	RS485_8B_EP_1S,
+	RS485_8B_OP_1S,
+	RS485_7B_EP_2S,
+	RS485_7B_OP_2S,
+	RS485_8B_NP_2S,
+	RS485_8B_EP_2S,
+	RS485_8B_OP_2S
+} RS485_DATA_FRAME;
+
+typedef enum RS485_HANDSHAKE {
+	XON_XOFF_DISABLE	= 0,
+	XON_XOFF_ENABLE
+} RS485_HANDSHAKE;
+  
+typedef enum RS485_DUPLEX {
+	RS485_FULL_DUPLEX	= 0,
+	RS485_HALF_DUPLEX
+} RS485_DUPLEX;
+
+typedef enum state_el6022t {
+	START, 
+	INIT_REQ, 
+	INIT_WAIT, 
+	PREP_REQ, 
+	PREP_WAIT, 
+	RUN
+} state_el6022t;
+
+typedef struct PACKED {
+	uint8 control;
+	uint8 output_length;
+	uint8 buffer_out[RS485_MAX_DATA_LENGTH];
+} out_el6022t;
+
+typedef struct PACKED {
+	uint8 status;
+	uint8 input_length;
+	uint8 buffer_in[RS485_MAX_DATA_LENGTH];
+} in_el6022t;
+
 typedef vector<double> doubles;
 
 // WARNING, the bits are numbered in reversed order
@@ -109,6 +197,7 @@ typedef struct PACKED
     uint16      spare_ai_2;			// Spare analog in 2
     uint16      linevoltage;        // 2500 bits = 25V; 1 bit = 0,01V
     uint16      time_stamp;
+    in_el6022t	in_el6022;			// Data structure for RS485 communication
 } in_tueEthercatMemoryt;    
 
 // WARNING, the bits are numbered in reversed order
@@ -150,6 +239,7 @@ typedef struct PACKED
     digital_out_t digital_out;      // digital output 8 bits
     int16       analog_out_1;       // analog output 1  (0V = -2048, 10V = 2047, 5V = 0 is no motion)
     int16       analog_out_2;       // analog output 2
+    out_el6022t	out_el6022;	    // Data structure for RS485 communication
 } out_tueEthercatMemoryt;
 
 using namespace RTT;
@@ -181,7 +271,19 @@ namespace soem_beckhoff_drivers {
         void write_analog_out(float val1, float val2);
         void stop();
 
+		// EL6022
+		bool readSB(uint8 bitmask);
+		bool readCB(uint8 bitmask);
+
     private:
+
+    	// EL6022
+    	void updateState();
+		void executeStateActions();
+		bool read();
+		bool write();
+        
+
         // Declaring of variables
         int printEnabled;
         int printDisabled;
@@ -192,6 +294,10 @@ namespace soem_beckhoff_drivers {
         digital_out_t digitalout;
         digital_in_t digitalin;
         digital_in_t digitalin_prev;
+
+        // EL 6022
+        bool rxReady, txReady;
+
 
         // Declaring of Messages
         DigitalMsg digitalIns_msg;
@@ -216,6 +322,11 @@ namespace soem_beckhoff_drivers {
         AnalogMsg  pwmDutyMotors_msg;
         AnalogMsg  ffmotors_msg;
         AnalogMsg  analogOuts_msg;
+
+        // EL6022
+        CommMsgBig msg_out; //terminal sends this msg to rs485 device
+		CommMsgBig msg_in; //terminal receives this msg from rs485 device
+
 
         // Declaring of pointers to the ethercan memory
         in_tueEthercatMemoryt* m_in_tueEthercat;
@@ -246,8 +357,23 @@ namespace soem_beckhoff_drivers {
         InputPort<AnalogMsg>   port_in_ffmotors;
         InputPort<bool>        port_in_enable;
 
+        // EL6022
+        // Orocos/ROS side
+        OutputPort<CommMsgBig> port_out;
+		InputPort<CommMsgBig> port_in;
+		OutputPort<bool> port_rx_ready;
+		OutputPort<bool> port_running;
+
         uint16 print_counter;
         float analogconverter;  // converter from 3.3V to 12bits
+
+        // EL6022
+        std::vector<parameter> m_params;
+		std::queue<uint8> bytesOut;
+
+		state_el6022t state;
+	
+		unsigned int trial;
     };
 }
 #endif

@@ -91,6 +91,100 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     m_service->addPort(port_in_analogOuts).doc("");
     m_service->addPort(port_in_enable).doc("");
 
+    // EL6022
+    m_service->addPort("data_rx", port_out).doc("Msg containing the received data from serial device");
+    m_service->addPort("data_tx", port_in).doc("Msg containing the data to send to the serial device");
+    m_service->addPort("ready_rx", port_rx_ready).doc("Signal specifying that the serial device is ready to receive the data");
+    m_service->addPort("running", port_running).doc("Signal specifying that the serial device is ready to transmit the data");
+
+    #if 0
+    parameter temp;
+
+    temp.description = "Send handshake Ch1";
+    temp.index = 0x8000;
+    temp.subindex = 0x02;
+    temp.name = "S_Handshake1";
+    temp.size = 1;
+    temp.param = XON_XOFF_DISABLE;
+    m_params.push_back(temp);
+
+    temp.description = "Receive handshake Ch1";
+    temp.index = 0x8000;
+    temp.subindex = 0x03;
+    temp.name = "R_Handshake1";
+    temp.size = 1;
+    temp.param = XON_XOFF_DISABLE;
+    m_params.push_back(temp);
+
+    temp.description = "Send handshake Ch2";
+    temp.index = 0x8010;
+    temp.subindex = 0x02;
+    temp.name = "S_Handshake2";
+    temp.size = 1;
+    temp.param = XON_XOFF_DISABLE;
+    m_params.push_back(temp);
+
+    temp.description = "Receive handshake Ch2";
+    temp.index = 0x8010;
+    temp.subindex = 0x03;
+    temp.name = "R_Handshake2";
+    temp.size = 1;
+    temp.param = XON_XOFF_DISABLE;
+    m_params.push_back(temp);
+
+    temp.description = "Baudrate Ch1";
+    temp.index = 0x8000;
+    temp.subindex = 0x11;
+    temp.name = "Baud1";
+    temp.size = 1;
+    temp.param = RS485_57600_BAUD;
+    m_params.push_back(temp);
+
+    temp.description = "Baudrate Ch2";
+    temp.index = 0x8010;
+    temp.subindex = 0x11;
+    temp.name = "Baud2";
+    temp.size = 1;
+    temp.param = RS485_57600_BAUD;
+    m_params.push_back(temp);
+
+    temp.description = "Data frame Ch1";
+    temp.index = 0x8000;
+    temp.subindex = 0x15;
+    temp.name = "Data_frame1";
+    temp.size = 1;
+    temp.param = RS485_8B_NP_1S;
+    m_params.push_back(temp);
+
+    temp.description = "Data frame Ch2";
+    temp.index = 0x8010;
+    temp.subindex = 0x15;
+    temp.name = "Data_frame2";
+    temp.size = 1;
+    temp.param = RS485_8B_NP_1S;
+    m_params.push_back(temp);
+
+    temp.description = "Enable half duplex Ch1";
+    temp.index = 0x8000;
+    temp.subindex = 0x06;
+    temp.name = "E_half_duplex1";
+    temp.size = 1;
+    temp.param = RS485_HALF_DUPLEX;
+    m_params.push_back(temp);
+
+    temp.description = "Enable half duplex Ch2";
+    temp.index = 0x8010;
+    temp.subindex = 0x06;
+    temp.name = "E_half_duplex2";
+    temp.size = 1;
+    temp.param = RS485_HALF_DUPLEX;
+    m_params.push_back(temp);
+
+    for (unsigned int i = 0; i < m_params.size(); i++) {
+        m_service->addProperty(m_params[i].name, m_params[i].param).doc(m_params[i].description);
+    }
+    #endif
+
     digitalIns_msg.values.assign(4,0);
     encoder1_msg.value = 0;
     encoder2_msg.value = 0;
@@ -135,6 +229,25 @@ bool TUeES030::configure() {
     digitalout.port = 0;
     
     print_counter = 0;
+
+    // EL6022
+    #if 0
+    for (unsigned int i = 0; i < m_params.size(); i++) {
+
+        while (EcatError)
+            log(RTT::Error) << ec_elist2string() << RTT::endlog();
+
+        ec_SDOwrite(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, m_params[i].size,
+                &(m_params[i].param), 
+                EC_TIMEOUTRXM);
+    }
+    #endif
+
+    msg_in.channels.resize(CHANNEL_NUM);
+    state = START;
+
+    
+    log(Debug) << "TUeES030::configure()"<< endlog();
     return true;
 }
 
@@ -146,6 +259,10 @@ bool TUeES030::start() {
     write_pwm((float)(0.0),(float)(0.0),(float)(0.0));
     write_analog_out((float)(0.0),(float)(0.0));
     write_mcommands(0, 0, 0); //braked
+
+    // get the pointers to the communication structs
+    m_in_tueEthercat = ((in_tueEthercatMemoryt*) (m_datap->inputs));
+    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
 
     return true;
 }
@@ -168,10 +285,6 @@ void TUeES030::update() {
             enablestatus = false;
         }
     }
-
-    // get the pointers to the communication structs
-    m_in_tueEthercat = ((in_tueEthercatMemoryt*) (m_datap->inputs));
-    m_out_tueEthercat = ((out_tueEthercatMemoryt*) (m_datap->outputs));
 	
     // read the data from the ethercat memory input and send to orocos
     read_digital_ins();
@@ -466,6 +579,174 @@ void TUeES030::write_analog_out(float val1, float val2) {
     m_out_tueEthercat->analog_out_1 = tmp1;
     m_out_tueEthercat->analog_out_2 = tmp2;
 
+}
+
+// EL6022
+void TUeES030::executeStateActions() {
+    switch (state) {
+        case START:
+            
+            trial = 0;
+            m_out_tueEthercat->out_el6022.control = 0x00;
+            m_out_tueEthercat->out_el6022.output_length = 0x00;
+            
+            for (unsigned int j = 0; j < RS485_MAX_DATA_LENGTH; j++) {
+                m_out_tueEthercat->out_el6022.buffer_out[j] = 0x00;
+            }
+            break;
+        case INIT_REQ:
+            m_out_tueEthercat->out_el6022.control = INIT_REQUEST;
+            break;
+        case INIT_WAIT:
+            trial++;
+            break;
+        case PREP_REQ:
+            trial=0;
+            m_out_tueEthercat->out_el6022.control = 0x00;
+            break;
+        case PREP_WAIT:
+            trial++;
+            break;
+        case RUN:
+            port_running.write(true);
+            
+            if (port_in.read(msg_out) == NewData) {
+                for (unsigned int i = 0; i < msg_out.channels[0].datasize; i++) {
+                    if ((uint8)bytesOut.size() >= MAX_OUT_QUEUE_SIZE) {
+                        log(Warning) << "Max out queue size reached on RS485 channel. Throwing away old bytes..." << endlog();
+                        bytesOut.pop();
+                    } 
+                    bytesOut.push(msg_out.channels[0].datapacket[i]);
+                }
+            }
+                        
+            write();
+            
+            if (read()) {
+                port_out.write(msg_in);
+                port_rx_ready.write(true);
+            } else {
+                port_rx_ready.write(false);                 
+            }
+            break;
+    }
+}
+
+void TUeES030::updateState() {
+    switch (state) {
+        case START:
+            state=INIT_REQ;
+            log(Debug) << "The state machine (re)started on RS485 channel " << endlog();
+            break;
+        case INIT_REQ:
+            state=INIT_WAIT;
+            log(Debug) << "The controller requests terminal for initialisation on RS485 channel " << endlog();
+            break;
+        case INIT_WAIT:
+            if (readSB(INIT_ACCEPTED)) {
+                state=PREP_REQ;
+                log(Debug) << "Initialisation was completed by the terminal on RS485 channel " << endlog();
+                break;
+            }
+            if (trial>MAX_TRIALS) {
+                state=START;
+                log(Debug) << "Max num of terminal initialization trials reached on RS485 channel " << endlog();
+                break;
+            } else {
+                state=INIT_WAIT;
+                break;
+            }
+        case PREP_REQ:
+            state=PREP_WAIT;
+            log(Debug) << "The controller requests terminal to prepare for serial data exchange on RS485 channel " << endlog();
+            break;
+        case PREP_WAIT:
+            if (!readSB(INIT_ACCEPTED)) {
+                state=RUN;
+                log(Debug) << "The terminal is ready for serial data exchange on RS485 channel " << endlog();
+                break;
+            }
+            if (trial>MAX_TRIALS) {
+                state=START;
+                log(Debug) << "Max num of terminal preparation trials reached on RS485 channel " << endlog();
+                break;
+            } else {
+                state=PREP_WAIT;
+                break;
+            }
+        case RUN:
+            if (readSB(PARITY_ERROR)) {
+                log(Warning) << "Parity error on RS485 channel!" << endlog();
+            }
+            if (readSB(FRAMING_ERROR)) {
+                log(Warning) << "Framing error on RS485 channel!" << endlog();
+            }
+            if (readSB(OVERRUN_ERROR)) {
+                log(Warning) << "Overrun error on RS485 channel!" << endlog();
+            }
+            state=RUN;
+            break;
+        default:
+            state=START;
+    }
+}
+
+bool TUeES030::read() {
+    if (readSB(RECEIVE_REQUEST)!=readCB(RECEIVE_ACCEPTED)) {
+        uint8 length = m_in_tueEthercat->in_el6022.input_length;
+        
+        msg_in.channels[0].datapacket.clear();
+        msg_in.channels[0].datapacket.resize(length);
+        
+        msg_in.channels[0].datapacket[i] = m_in_tueEthercat->in_el6022.buffer_in[i];
+        msg_in.channels[0].datasize = length;
+        
+        log(Debug) << "Read " << (uint16) length << " bytes on RS485 channel: ";
+        for (unsigned int i = 0; i < length; i++) {
+            log(Debug) << (unsigned int) m_in_tueEthercat->in_el6022.buffer_in[i] << " ";
+        }
+        log(Debug) << endlog();
+        
+        m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ RECEIVE_ACCEPTED; // acknowledge that the new data is received
+        
+        return true;
+    }
+    return false;
+}
+
+bool TUeES030::write() {
+    if (readCB(TRANSMIT_REQUEST)==readSB(TRANSMIT_ACCEPTED)) {
+        uint8 length = 0;
+        
+        while ((!bytesOut.empty()) && (length < RS485_MAX_DATA_LENGTH)) {
+            m_out_tueEthercat->out_el6022.buffer_out[length] = bytesOut.front();
+            bytesOut.pop();
+            length++;
+        }
+        
+        if (length == 0) return false;
+
+        m_out_tueEthercat->out_el6022.output_length = length;
+        
+        log(Debug) << "Written " << (uint16) length << " bytes on RS485 channel: ";
+        for (unsigned int i = 0; i < length; i++) {
+            log(Debug) << (unsigned int) m_out_tueEthercat->out_el6022.buffer_out[i] << " ";
+        }
+        log(Debug) << endlog();
+        
+        m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ TRANSMIT_REQUEST; // request transmitting the new data
+        
+        return true;
+    }
+    return false;
+}
+
+bool TUeES030::readSB(uint8 bitmask) {
+    return (m_in_tueEthercat->in_el6022.status & bitmask)==bitmask;
+}
+
+bool TUeES030::readCB(uint8 bitmask) {
+    return (m_out_tueEthercat->out_el6022.control & bitmask)==bitmask;
 }
 
 void TUeES030::stop() {

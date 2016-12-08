@@ -698,7 +698,9 @@ bool TUeES030::read() {
         msg_in.channels[0].datapacket.clear();
         msg_in.channels[0].datapacket.resize(length);
         
-        msg_in.channels[0].datapacket[i] = m_in_tueEthercat->in_el6022.buffer_in[i];
+        for (unsigned int i = 0; i < length; i++) {
+            msg_in.channels[0].datapacket[i] = m_in_tueEthercat->in_el6022.buffer_in[i];
+        }
         msg_in.channels[0].datasize = length;
         
         log(Debug) << "Read " << (uint16) length << " bytes on RS485 channel: ";

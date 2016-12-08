@@ -3,6 +3,8 @@ project(tue_ethercat_drivers)
 
 find_package(catkin REQUIRED 
   soem_master
+  roscpp
+  soem_beckhoff_drivers
 )
 
 find_package(OROCOS-RTT REQUIRED ${RTT_HINTS} )
@@ -32,9 +34,9 @@ orocos_plugin(EK1100 src/soem_beckhoff_drivers.cpp src/EK1100_dummy.cpp ${HEADER
 target_link_libraries(EK1100 ${soem_LIBRARIES})
 
 # Wait for message generation
-#add_dependencies(TUeES020 soem_beckhoff_drivers_generate_messages_cpp)
-#add_dependencies(TUeES030 soem_beckhoff_drivers_generate_messages_cpp)
-#add_dependencies(TUeEC010 soem_beckhoff_drivers_generate_messages_cpp)
-#add_dependencies(EK1100   soem_beckhoff_drivers_generate_messages_cpp)
+add_dependencies(TUeES020 ${catkin_EXPORTED_TARGETS})
+add_dependencies(TUeES030 ${catkin_EXPORTED_TARGETS})
+add_dependencies(TUeEC010 ${catkin_EXPORTED_TARGETS})
+add_dependencies(EK1100   ${catkin_EXPORTED_TARGETS})
 
 orocos_generate_package() 

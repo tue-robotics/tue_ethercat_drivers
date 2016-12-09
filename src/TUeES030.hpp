@@ -280,8 +280,8 @@ namespace soem_beckhoff_drivers {
     	// EL6022
     	void updateState();
 		void executeStateActions();
-		bool read();
-		bool write();
+		bool read_rx();
+		bool write_tx();
         
 
         // Declaring of variables

@@ -624,9 +624,9 @@ void TUeES030::executeStateActions() {
                 }
             }
                         
-            write();
+            TUeES030::write_tx();
             
-            if (read()) {
+            if (TUeES030::read_rx()) {
                 port_out.write(msg_in);
                 port_rx_ready.write(true);
             } else {
@@ -695,7 +695,7 @@ void TUeES030::updateState() {
     }
 }
 
-bool TUeES030::read() {
+bool TUeES030::read_rx() {
     if (readSB(RECEIVE_REQUEST)!=readCB(RECEIVE_ACCEPTED)) {
         uint8 length = m_in_tueEthercat->in_el6022.input_length;
         
@@ -707,11 +707,11 @@ bool TUeES030::read() {
         }
         msg_in.channels[0].datasize = length;
         
-        log(Debug) << "Read " << (uint16) length << " bytes on RS485 channel: ";
+        log(Warning) << "Read " << (uint16) length << " bytes on RS485 channel: ";
         for (unsigned int i = 0; i < length; i++) {
             log(Debug) << (unsigned int) m_in_tueEthercat->in_el6022.buffer_in[i] << " ";
         }
-        log(Debug) << endlog();
+        log(Warning) << endlog();
         
         m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ RECEIVE_ACCEPTED; // acknowledge that the new data is received
         
@@ -720,7 +720,7 @@ bool TUeES030::read() {
     return false;
 }
 
-bool TUeES030::write() {
+bool TUeES030::write_tx() {
     if (readCB(TRANSMIT_REQUEST)==readSB(TRANSMIT_ACCEPTED)) {
         uint8 length = 0;
         

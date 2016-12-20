@@ -245,6 +245,7 @@ bool TUeES030::configure() {
 
     msg_in.channels.resize(CHANNEL_NUM);
     state = START;
+    old_status=0x00;
 	count = 0;
     
     log(Debug) << "TUeES030::configure()"<< endlog();
@@ -289,13 +290,19 @@ void TUeES030::update() {
     // EL6022
     executeStateActions();
     updateState();
+    old_status=m_in_tueEthercat->in_el6022.status;
     
-    if (count % 500 == 0)
+    if (count % 1 == 0)
     {
 		status = m_in_tueEthercat->in_el6022.status;
-		count++;
 		log(Warning) << "RS485 status: " << status <<endlog();
-	}
+		//control = m_out_tueEthercat->out_el6022.control;
+		//log(Warning) << "RS485 control: " << control <<endlog();
+		//buffer = m_in_tueEthercat->in_el6022.buffer_in[0];
+		//log(Warning) << "RS485 buffer_in: " << buffer <<endlog();
+	} 
+	count=count+1;
+	//log(Warning) << count << endlog();
 	
     // read the data from the ethercat memory input and send to orocos
     read_digital_ins();
@@ -624,7 +631,7 @@ void TUeES030::executeStateActions() {
             if (port_in.read(msg_out) == NewData) {
                 for (unsigned int i = 0; i < msg_out.channels[0].datasize; i++) {
                     if ((uint8)bytesOut.size() >= MAX_OUT_QUEUE_SIZE) {
-                        log(Warning) << "Max out queue size reached on RS485 channel. Throwing away old bytes..." << endlog();
+                        //log(Warning) << "Max out queue size reached on RS485 channel. Throwing away old bytes..." << endlog();
                         bytesOut.pop();
                     } 
                     bytesOut.push(msg_out.channels[0].datapacket[i]);
@@ -703,6 +710,11 @@ void TUeES030::updateState() {
 }
 
 bool TUeES030::read_rx() {
+	//if (count % 500 == 0)
+    //{
+		//log(Warning) << "Receive request " << readSB(RECEIVE_REQUEST) << endlog();
+		//log(Warning) << "Receive accepted " << readCB(RECEIVE_ACCEPTED) << endlog();
+	//}
     if (readSB(RECEIVE_REQUEST)!=readCB(RECEIVE_ACCEPTED)) {
         uint8 length = m_in_tueEthercat->in_el6022.input_length;
         
@@ -719,9 +731,11 @@ bool TUeES030::read_rx() {
             log(Debug) << (unsigned int) m_in_tueEthercat->in_el6022.buffer_in[i] << " ";
         }
         log(Warning) << endlog();
-        
-        m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ RECEIVE_ACCEPTED; // acknowledge that the new data is received
-        
+        control = m_out_tueEthercat->out_el6022.control;
+        log(Warning) << "Control_before: " << control << endlog();
+        m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ RECEIVE_ACCEPTED; // acknowledge that the new data is received; ^ = toggle
+        control = m_out_tueEthercat->out_el6022.control;
+        log(Warning) << "Control_after:  " << control << endlog();
         return true;
     }
     return false;
@@ -734,6 +748,7 @@ bool TUeES030::write_tx() {
         while ((!bytesOut.empty()) && (length < RS485_MAX_DATA_LENGTH)) {
             m_out_tueEthercat->out_el6022.buffer_out[length] = bytesOut.front();
             bytesOut.pop();
+            log(Warning) << "Writing " << endlog();
             length++;
         }
         
@@ -747,7 +762,7 @@ bool TUeES030::write_tx() {
         }
         log(Debug) << endlog();
         
-        m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ TRANSMIT_REQUEST; // request transmitting the new data
+        m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ TRANSMIT_REQUEST; // request transmitting the new data; ^ = toggle
         
         return true;
     }
@@ -755,7 +770,7 @@ bool TUeES030::write_tx() {
 }
 
 bool TUeES030::readSB(uint8 bitmask) {
-    return (m_in_tueEthercat->in_el6022.status & bitmask)==bitmask;
+    return ((m_in_tueEthercat->in_el6022.status ^ old_status) & bitmask)==bitmask;
 }
 
 bool TUeES030::readCB(uint8 bitmask) {

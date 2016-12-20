@@ -374,8 +374,13 @@ namespace soem_beckhoff_drivers {
 		state_el6022t state;
 	
 		unsigned int trial;
+		
 		unsigned int count;
 		unsigned int status;
+		unsigned int control;
+		unsigned int buffer;
+		
+		unsigned int old_status;
     };
 }
 #endif

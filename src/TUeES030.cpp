@@ -245,7 +245,7 @@ bool TUeES030::configure() {
 
     msg_in.channels.resize(CHANNEL_NUM);
     state = START;
-
+	count = 0;
     
     log(Debug) << "TUeES030::configure()"<< endlog();
     return true;
@@ -289,6 +289,13 @@ void TUeES030::update() {
     // EL6022
     executeStateActions();
     updateState();
+    
+    if (count % 500 == 0)
+    {
+		status = m_in_tueEthercat->in_el6022.status;
+		count++;
+		log(Warning) << "RS485 status: " << status <<endlog();
+	}
 	
     // read the data from the ethercat memory input and send to orocos
     read_digital_ins();

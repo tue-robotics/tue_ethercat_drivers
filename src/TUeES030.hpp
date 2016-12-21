@@ -381,6 +381,7 @@ namespace soem_beckhoff_drivers {
 		unsigned int buffer;
 		
 		unsigned int old_status;
+		unsigned int old_control;
     };
 }
 #endif

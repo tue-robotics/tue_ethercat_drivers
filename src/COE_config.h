@@ -42,10 +42,13 @@ extern "C"{
 
 
  typedef struct{
-	      uint16   index;
-	      uint8    subindex;
-	      uint8    size;
-	      int      param;
+              uint16    index;
+              uint8     subindex;
+              uint8     size;
+              int8      param_I8;
+              int16     param_I16;
+              uint16    param_UI16;
+              float     param_F;
 	      std::string   name;
 	      std::string   description;
 	  }parameter;

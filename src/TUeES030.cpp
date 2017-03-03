@@ -97,15 +97,287 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     m_service->addPort("ready_rx", port_rx_ready).doc("Signal specifying that the serial device is ready to receive the data");
     m_service->addPort("running", port_running).doc("Signal specifying that the serial device is ready to transmit the data");
 
-    #if 0
     parameter temp;
 
+    // Motor resistance
+    temp.description = "Motor 1 resistance";
+    temp.index = 0x8000;
+    temp.subindex = 0x01;
+    temp.name = "M1_restistance";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.61;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 resistance";
+    temp.index = 0x8001;
+    temp.subindex = 0x01;
+    temp.name = "M2_restistance";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.61;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 resistance";
+    temp.index = 0x8002;
+    temp.subindex = 0x01;
+    temp.name = "M3_restistance";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.61;
+    m_params.push_back(temp);
+
+    // current control Kv
+    temp.description = "Motor 1 Kv";
+    temp.index = 0x8000;
+    temp.subindex = 0x02;
+    temp.name = "M1_Kv";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.03;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 Kv";
+    temp.index = 0x8001;
+    temp.subindex = 0x02;
+    temp.name = "M2_Kv";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.03;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 Kv";
+    temp.index = 0x8002;
+    temp.subindex = 0x02;
+    temp.name = "M3_Kv";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.03;
+    m_params.push_back(temp);
+
+    // current control Pgain
+    temp.description = "Motor 1 Pgain";
+    temp.index = 0x8000;
+    temp.subindex = 0x03;
+    temp.name = "M1_Pgain";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 2.0;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 Pgain";
+    temp.index = 0x8001;
+    temp.subindex = 0x03;
+    temp.name = "M2_Pgain";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 2.0;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 Pgain";
+    temp.index = 0x8002;
+    temp.subindex = 0x03;
+    temp.name = "M3_Pgain";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 2.0;
+    m_params.push_back(temp);
+
+    // current control Igain
+    temp.description = "Motor 1 Igain";
+    temp.index = 0x8000;
+    temp.subindex = 0x04;
+    temp.name = "M1_Igain";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 2.0;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 Igain";
+    temp.index = 0x8001;
+    temp.subindex = 0x04;
+    temp.name = "M2_Igain";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 2.0;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 Igain";
+    temp.index = 0x8002;
+    temp.subindex = 0x04;
+    temp.name = "M3_Igain";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 2.0;
+    m_params.push_back(temp);
+
+    // current control Ilimit
+    temp.description = "Motor 1 Ilimit";
+    temp.index = 0x8000;
+    temp.subindex = 0x05;
+    temp.name = "M1_Ilimit";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.2;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 Ilimit";
+    temp.index = 0x8001;
+    temp.subindex = 0x05;
+    temp.name = "M2_Ilimit";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.2;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 Ilimit";
+    temp.index = 0x8002;
+    temp.subindex = 0x05;
+    temp.name = "M3_Ilimit";
+    temp.size = 4;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.2;
+    m_params.push_back(temp);
+
+    // Encoder Direction
+    temp.description = "Motor 1 EncDir";
+    temp.index = 0x8000;
+    temp.subindex = 0x06;
+    temp.name = "M1_EncDir";
+    temp.size = 1;
+    temp.param_I8 = 1;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 EncDir";
+    temp.index = 0x8001;
+    temp.subindex = 0x06;
+    temp.name = "M2_EncDir";
+    temp.size = 1;
+    temp.param_I8 = 1;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 EncDir";
+    temp.index = 0x8002;
+    temp.subindex = 0x06;
+    temp.name = "M3_EncDir";
+    temp.size = 1;
+    temp.param_I8 = 1;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    // Encoder Resolution
+    temp.description = "Motor 1 EncRes";
+    temp.index = 0x8000;
+    temp.subindex = 0x07;
+    temp.name = "M1_EncRes";
+    temp.size = 2;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 1024;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 EncRes";
+    temp.index = 0x8001;
+    temp.subindex = 0x07;
+    temp.name = "M2_EncRes";
+    temp.size = 2;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 1024;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 EncRes";
+    temp.index = 0x8002;
+    temp.subindex = 0x07;
+    temp.name = "M3_EncRes";
+    temp.size = 2;
+    temp.param_I8 = 0;
+    temp.param_I16 = 0;
+    temp.param_UI16 = 1024;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    // current control Current Zero
+    temp.description = "Motor 1 Czero";
+    temp.index = 0x8000;
+    temp.subindex = 0x08;
+    temp.name = "M1_Czero";
+    temp.size = 2;
+    temp.param_I8 = 0;
+    temp.param_I16 = 2168;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 2 Czero";
+    temp.index = 0x8001;
+    temp.subindex = 0x08;
+    temp.name = "M2_Czero";
+    temp.size = 2;
+    temp.param_I8 = 0;
+    temp.param_I16 = 2168;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+    temp.description = "Motor 3 Czero";
+    temp.index = 0x8002;
+    temp.subindex = 0x08;
+    temp.name = "M3_Czero";
+    temp.size = 2;
+    temp.param_I8 = 0;
+    temp.param_I16 = 2168;
+    temp.param_UI16 = 0;
+    temp.param_F = 0.;
+    m_params.push_back(temp);
+
+#if 0
     temp.description = "Send handshake Ch1";
     temp.index = 0x8000;
     temp.subindex = 0x02;
     temp.name = "S_Handshake1";
     temp.size = 1;
-    temp.param = XON_XOFF_DISABLE;
+    temp.param_I16 = XON_XOFF_DISABLE;
     m_params.push_back(temp);
 
     temp.description = "Receive handshake Ch1";
@@ -113,7 +385,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x03;
     temp.name = "R_Handshake1";
     temp.size = 1;
-    temp.param = XON_XOFF_DISABLE;
+    temp.param_I16 = XON_XOFF_DISABLE;
     m_params.push_back(temp);
 
     temp.description = "Send handshake Ch2";
@@ -121,7 +393,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x02;
     temp.name = "S_Handshake2";
     temp.size = 1;
-    temp.param = XON_XOFF_DISABLE;
+    temp.param_I16 = XON_XOFF_DISABLE;
     m_params.push_back(temp);
 
     temp.description = "Receive handshake Ch2";
@@ -129,7 +401,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x03;
     temp.name = "R_Handshake2";
     temp.size = 1;
-    temp.param = XON_XOFF_DISABLE;
+    temp.param_I16 = XON_XOFF_DISABLE;
     m_params.push_back(temp);
 
     temp.description = "Baudrate Ch1";
@@ -137,7 +409,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x11;
     temp.name = "Baud1";
     temp.size = 1;
-    temp.param = RS485_57600_BAUD;
+    temp.param_I16 = RS485_57600_BAUD;
     m_params.push_back(temp);
 
     temp.description = "Baudrate Ch2";
@@ -145,7 +417,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x11;
     temp.name = "Baud2";
     temp.size = 1;
-    temp.param = RS485_57600_BAUD;
+    temp.param_I16 = RS485_57600_BAUD;
     m_params.push_back(temp);
 
     temp.description = "Data frame Ch1";
@@ -153,7 +425,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x15;
     temp.name = "Data_frame1";
     temp.size = 1;
-    temp.param = RS485_8B_NP_1S;
+    temp.param_I16 = RS485_8B_NP_1S;
     m_params.push_back(temp);
 
     temp.description = "Data frame Ch2";
@@ -161,7 +433,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x15;
     temp.name = "Data_frame2";
     temp.size = 1;
-    temp.param = RS485_8B_NP_1S;
+    temp.param_I16 = RS485_8B_NP_1S;
     m_params.push_back(temp);
 
     temp.description = "Enable half duplex Ch1";
@@ -169,7 +441,7 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x06;
     temp.name = "E_half_duplex1";
     temp.size = 1;
-    temp.param = RS485_HALF_DUPLEX;
+    temp.param_I16 = RS485_HALF_DUPLEX;
     m_params.push_back(temp);
 
     temp.description = "Enable half duplex Ch2";
@@ -177,13 +449,25 @@ TUeES030::TUeES030(ec_slavet* mem_loc) :
     temp.subindex = 0x06;
     temp.name = "E_half_duplex2";
     temp.size = 1;
-    temp.param = RS485_HALF_DUPLEX;
+    temp.param_I16 = RS485_HALF_DUPLEX;
     m_params.push_back(temp);
+#endif
 
     for (unsigned int i = 0; i < m_params.size(); i++) {
-        m_service->addProperty(m_params[i].name, m_params[i].param).doc(m_params[i].description);
+        if (m_params[i].param_I8!=0) {
+            m_service->addProperty(m_params[i].name, m_params[i].param_I8).doc(m_params[i].description);
+        }
+        else if (m_params[i].param_I16!=0) {
+            m_service->addProperty(m_params[i].name, m_params[i].param_I16).doc(m_params[i].description);
+        }
+        else if (m_params[i].param_UI16!=0) {
+            m_service->addProperty(m_params[i].name, m_params[i].param_UI16).doc(m_params[i].description);
+        }
+        else {
+            m_service->addProperty(m_params[i].name, m_params[i].param_F).doc(m_params[i].description);
+        }
     }
-    #endif
+
 
     digitalIns_msg.values.assign(4,0);
     encoder1_msg.value = 0;
@@ -230,18 +514,40 @@ bool TUeES030::configure() {
     
     print_counter = 0;
 
-    // EL6022
-    #if 0
+    // Setting parameters
     for (unsigned int i = 0; i < m_params.size(); i++) {
 
         while (EcatError)
             log(RTT::Error) << ec_elist2string() << RTT::endlog();
 
-        ec_SDOwrite(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, m_params[i].size,
-                &(m_params[i].param), 
+        if (m_params[i].param_I8!=0) {
+            ec_SDOwrite(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, m_params[i].size,
+                &(m_params[i].param_I8),
                 EC_TIMEOUTRXM);
+        }
+        else if (m_params[i].param_I16!=0) {
+            ec_SDOwrite(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, m_params[i].size,
+                &(m_params[i].param_I16),
+                EC_TIMEOUTRXM);
+        }
+        else if (m_params[i].param_UI16!=0) {
+            ec_SDOwrite(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, m_params[i].size,
+                &(m_params[i].param_UI16),
+                EC_TIMEOUTRXM);
+        }
+        else
+        {
+            ec_SDOwrite(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, m_params[i].size,
+                    &(m_params[i].param_F),
+                    EC_TIMEOUTRXM);
+        }
+
+//        float data;
+//        ec_SDOread(((m_datap->configadr) & 0x0F), m_params[i].index, m_params[i].subindex, FALSE, &os_read,
+//                   &data,
+//                   EC_TIMEOUTRXM);
+//        log(RTT::Warning) << data << endlog();
     }
-    #endif
 
     msg_in.channels.resize(CHANNEL_NUM);
     state = START;
@@ -296,9 +602,9 @@ void TUeES030::update() {
     if (count % 1 == 0)
     {
 		status = m_in_tueEthercat->in_el6022.status;
-		log(Warning) << "RS485 status: " << status <<endlog();
+		//log(Warning) << "RS485 status: " << status <<endlog();
 		control = m_out_tueEthercat->out_el6022.control;
-		log(Warning) << "RS485 control: " << control <<endlog();
+		//log(Warning) << "RS485 control: " << control <<endlog();
 		//buffer = m_in_tueEthercat->in_el6022.buffer_in[0];
 		//log(Warning) << "RS485 buffer_in: " << buffer <<endlog();
 	} 
@@ -640,14 +946,14 @@ void TUeES030::executeStateActions() {
                 }
             }
             
+            TUeES030::write_tx();
+            
             if (TUeES030::read_rx()) {
                 port_out.write(msg_in);
                 port_rx_ready.write(true);
             } else {
                 port_rx_ready.write(false);                 
             }
-            
-            TUeES030::write_tx(); // write after read
             
         break;
     }
@@ -715,7 +1021,7 @@ void TUeES030::updateState() {
 bool TUeES030::read_rx() {
 	log(Warning) << "Receive request:  " << readSB(RECEIVE_REQUEST) << endlog();
 	log(Warning) << "Receive accepted: " << readCB(RECEIVE_ACCEPTED) << endlog();
-	log(Warning) << "Input length:     " << m_in_tueEthercat->in_el6022.input_length << endlog();
+	//log(Warning) << "Input length:     " << (uint16) m_in_tueEthercat->in_el6022.input_length << endlog();
     if (readSB(RECEIVE_REQUEST)!=readCB(RECEIVE_ACCEPTED)) {
         uint8 length = m_in_tueEthercat->in_el6022.input_length;
         
@@ -727,16 +1033,16 @@ bool TUeES030::read_rx() {
         }
         msg_in.channels[0].datasize = length;
         
-        log(Warning) << "Read " << (uint16) length << " bytes on RS485 channel: ";
+        log(Debug) << "Read " << (uint16) length << " bytes on RS485 channel: ";
         for (unsigned int i = 0; i < length; i++) {
             log(Debug) << (unsigned int) m_in_tueEthercat->in_el6022.buffer_in[i] << " ";
         }
-        log(Warning) << endlog();
+        log(Debug) << endlog();
         control = m_out_tueEthercat->out_el6022.control;
-        log(Warning) << "Control_before: " << control << endlog();
+        //log(Debug) << "Control_before: " << control << endlog();
         m_out_tueEthercat->out_el6022.control = m_out_tueEthercat->out_el6022.control ^ RECEIVE_ACCEPTED; // acknowledge that the new data is received; ^ = toggle
         control = m_out_tueEthercat->out_el6022.control;
-        log(Warning) << "Control_after:  " << control << endlog();
+        //log(Debug) << "Control_after:  " << control << endlog();
         return true;
     }
     return false;
@@ -749,7 +1055,7 @@ bool TUeES030::write_tx() {
         while ((!bytesOut.empty()) && (length < RS485_MAX_DATA_LENGTH)) {
             m_out_tueEthercat->out_el6022.buffer_out[length] = bytesOut.front();
             bytesOut.pop();
-            log(Warning) << "Writing " << endlog();
+            //log(Debug) << "Writing " << endlog();
             length++;
         }
         
@@ -757,7 +1063,7 @@ bool TUeES030::write_tx() {
 
         m_out_tueEthercat->out_el6022.output_length = length;
         
-        log(Warning) << "Written " << (uint16) length << " bytes on RS485 channel: ";
+        log(Debug) << "Written " << (uint16) length << " bytes on RS485 channel: ";
         for (unsigned int i = 0; i < length; i++) {
             log(Debug) << (unsigned int) m_out_tueEthercat->out_el6022.buffer_out[i] << " ";
         }
@@ -771,7 +1077,7 @@ bool TUeES030::write_tx() {
 }
 
 bool TUeES030::readSB(uint8 bitmask) {
-    return ((m_in_tueEthercat->in_el6022.status ^ old_status) & bitmask)==bitmask;
+    return ((m_in_tueEthercat->in_el6022.status /*^ old_status*/) & bitmask)==bitmask;
 }
 
 bool TUeES030::readCB(uint8 bitmask) {

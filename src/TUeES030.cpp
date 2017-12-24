@@ -629,10 +629,12 @@ void TUeES030::update() {
         // digital outputs
         if (port_in_digitalOuts.connected()) {
             if (port_in_digitalOuts.read(digitalOuts_msg) == NewData) {
+		if (digitalOuts_msg.size() > 2)
+			log(Error) << "Only two Digitial Outputs available" << endlog();
                 digitalout.line.enable_1 = digitalOuts_msg.values[0];
                 digitalout.line.enable_2 = digitalOuts_msg.values[1];
-                digitalout.line.spare_do_3 = digitalOuts_msg.values[2];
-                digitalout.line.spare_do_4 = digitalOuts_msg.values[3];
+                //digitalout.line.spare_do_3 = digitalOuts_msg.values[2];
+                //digitalout.line.spare_do_4 = digitalOuts_msg.values[3];
             }
         }
         // motor commands

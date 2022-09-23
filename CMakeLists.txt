@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tue_ethercat_drivers)
 
+add_compile_options(-Wall -Werror=all)
+add_compile_options(-Wextra -Werror=extra)
+
 find_package(catkin REQUIRED 
   soem_master
   roscpp

@@ -13,12 +13,13 @@ find_package(catkin REQUIRED
 find_package(OROCOS-RTT REQUIRED ${RTT_HINTS} )
 include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
 find_package(soem REQUIRED)
-include_directories(${soem_INCLUDE_DIRS})
+
+include_directories(
+  SYSTEM
+  ${catkin_INCLUDE_DIRS}
+  ${soem_INCLUDE_DIRS}
+)
 
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 

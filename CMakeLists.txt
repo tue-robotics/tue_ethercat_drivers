@@ -15,15 +15,17 @@ include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
 
 find_package(soem REQUIRED)
 
+orocos_use_package(soem_master)
+orocos_use_package(soem_beckhoff_drivers)
+
 include_directories(
   SYSTEM
   ${catkin_INCLUDE_DIRS}
   ${soem_INCLUDE_DIRS}
+  ${USE_OROCOS_INCLUDE_DIRS}
 )
 
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
-
-orocos_use_package(soem_master)
 
 # TUe EtherCAT print drivers
 orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020.cpp ${HEADER_FILES})

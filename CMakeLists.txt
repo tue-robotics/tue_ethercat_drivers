@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tue_ethercat_drivers)
 
+add_compile_options(-Wall -Werror=all)
+add_compile_options(-Wextra -Werror=extra)
+
 find_package(catkin REQUIRED 
   soem_master
   roscpp
@@ -10,16 +13,19 @@ find_package(catkin REQUIRED
 find_package(OROCOS-RTT REQUIRED ${RTT_HINTS} )
 include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
 find_package(soem REQUIRED)
-include_directories(${soem_INCLUDE_DIRS})
-
-file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
 orocos_use_package(soem_master)
+orocos_use_package(soem_beckhoff_drivers)
+
+include_directories(
+  SYSTEM
+  ${catkin_INCLUDE_DIRS}
+  ${soem_INCLUDE_DIRS}
+  ${USE_OROCOS_INCLUDE_DIRS}
+)
+
+file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
 # TUe EtherCAT print drivers
 orocos_plugin(TUeES020 src/soem_beckhoff_drivers.cpp src/TUeES020.cpp ${HEADER_FILES})
